@@ -1,0 +1,8 @@
+'use strict';
+
+angular.module('MyGuestCare').controller('##submodule_name_camel##Ctrl', ['$scope', '$rootScope', '$filter', '$log', '$q', '$uibModal', '$timeout', '$interval', '$state', '$stateParams', 'moment', 'ngToast', 'WebSocketClient', 'Common##module_name_camel##Srvc', '##submodule_name_camel##Srvc', 
+	function($scope, $rootScope, $filter, $log, $q, $uibModal,  $timeout, $interval, $state, $stateParams, moment, ngToast, WebSocketClient, Common##module_name_camel##Srvc, ##submodule_name_camel##Srvc) {
+
+	//your controller code here
+
+}]);

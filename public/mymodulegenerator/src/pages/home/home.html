@@ -1,0 +1,92 @@
+<ion-header>
+  <ion-navbar color="girl">
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>
+      Lista note
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+  <div style="position: relative">
+    <ion-img src="../../assets/imgs/notes-imagery.jpg" class="header-imagery"></ion-img>
+    <div style="position: absolute; top: 60px; left: 10px; right: 10px;">
+
+        <ion-card>
+          <ion-card-content>
+              <ion-item>
+                  <ion-label color="primary">Cerca nota</ion-label>
+                  <ion-input placeholder="Es. chinotto" [(ngModel)]="autocomplete.query"
+                  (ionChange)="updateSearch(autocomplete.query)" clearInput></ion-input>
+              </ion-item>
+          </ion-card-content>
+        </ion-card>
+        <ion-card>
+          <!--
+            <ion-card-header>
+              Ricerca no
+            </ion-card-header>
+          -->
+
+          
+            <ion-card-content style="min-height:80vh">
+              
+               
+            
+              <ion-list>
+                  
+                <ion-item *ngFor="let i of items">
+                  
+                  <ion-thumbnail item-start>
+                    <img src="{{i.thumb}}">
+                  </ion-thumbnail>
+                
+                  <h2>{{i.name}}</h2>
+                  <button ion-button color="boy" item-end (click)="addNote(i)">Add</button>
+                </ion-item>
+              </ion-list>
+            
+              <br/><br/><br/>
+            
+
+              <ion-card color="light" *ngIf="selectedNotes.length">
+                  <ion-card-header>
+                      <ion-title>Note selezionate</ion-title>
+                  </ion-card-header>
+                  <ion-card-content>
+                      <ion-chip *ngFor="let s of selectedNotes; let i = index">
+                          <ion-avatar>
+                            <img src="{{s.thumb}}">
+                          </ion-avatar>
+                          <ion-label>{{s.name}}</ion-label>
+                          <button ion-button clear color="light" (click)="deleteNote(i)">
+                              <ion-icon name="close-circle"></ion-icon>
+                          </button>
+                        </ion-chip>
+                        <br/>
+                        
+                        
+                  </ion-card-content>
+              </ion-card>
+
+              <div padding text-center *ngIf="selectedNotes.length">
+                <button ion-button color="girl" round item-end (click)="addNote(i)">Cerca per note</button>
+              </div>
+
+             
+            
+            
+            </ion-card-content>
+        </ion-card>
+    </div>
+
+  </div>
+
+
+
+    
+
+</ion-content>
