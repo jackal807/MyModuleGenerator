@@ -1,0 +1,53 @@
+'use strict';
+
+var myApp = angular.module('MyGuestCare');
+
+/**
+ * Route configuration.
+ */
+function ##module_name_lower_case##Config($stateProvider, $urlRouterProvider, $ocLazyLoadProvider, IdleProvider, KeepaliveProvider) {
+	
+	window.global = window.resourcesUrl + "/angular-resources";
+	
+	// Configure Idle settings
+    IdleProvider.idle(5); // in seconds
+    IdleProvider.timeout(120); // in seconds
+
+    // For unmatched routes
+    $urlRouterProvider.otherwise('/statscharts');
+
+    $ocLazyLoadProvider.config({
+        // Set to true if you want to see what and when is dynamically loaded
+        debug: false
+    });
+    
+
+    $stateProvider.state('crsstats', {
+        url: "/statscharts/crsstats/",
+        templateUrl: window.global + '/stats-charts/views/crs-stats.html',
+        controller: 'CrsStatsCtrl'
+        
+    }).state('channelstats', {
+        url: "/statscharts/channelstats",
+        templateUrl: window.global + '/stats-charts/views/channel-stats.html',
+        controller: 'ChannelStatsCtrl'
+        
+    }).state('bookingenginestats', {
+        url: "/statscharts/bookingenginestats",
+        templateUrl: window.global + '/stats-charts/views/booking-engine-stats.html',
+        controller: 'BookingEngineStatsCtrl'
+        
+    }).state('pmsstats', {
+        url: "/statscharts/pmsstats",
+        templateUrl: window.global + '/stats-charts/views/pms-stats.html',
+        controller: 'PmsStatsCtrl'
+        
+    });
+    
+    
+};
+
+angular.module('MyGuestCare').config(##module_name_lower_case##Config).run(function($rootScope, $state, $stateParams) {
+	$rootScope.$state = $state;
+	$rootScope.$stateParams = $stateParams;
+});

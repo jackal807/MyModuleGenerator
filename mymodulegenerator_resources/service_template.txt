@@ -1,0 +1,7 @@
+'use strict';
+
+angular.module('MyGuestCare').service('##submodule_name_camel##Srvc', ["$http", "$q", "$log", "moment", "ngToast", "$uibModal", function($http, $q, $log, moment, ngToast, $uibModal){
+	
+	
+}]);
+
