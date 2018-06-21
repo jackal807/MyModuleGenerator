@@ -4,7 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { HomePage } from '../pages/home/home';
-import { PerfumePage } from '../pages/perfume/perfume';
+import { SettingsPage } from '../pages/settings/settings';
 @Component({
   templateUrl: 'app.html'
 })
@@ -24,8 +24,8 @@ export class MyApp {
     });
 
     this.pages = [
-      { title: 'Cerca per note', component: HomePage },
-      { title: 'Cerca profumo', component: PerfumePage }
+      { title: 'Generazione modulo', component: HomePage },
+      { title: 'Impostazioni path', component: SettingsPage }
     ];
   }
 

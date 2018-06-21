@@ -8,10 +8,9 @@ import { FormsModule } from '@angular/forms';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
-import { PerfumePage } from '../pages/perfume/perfume';
+import { SettingsPage } from '../pages/settings/settings';
 import { RestProvider } from '../providers/rest/rest';
 
-import { AutoCompleteModule } from 'ionic2-auto-complete';
 import { NotesAutocompleteProvider } from '../providers/notes-autocomplete/notes-autocomplete';
 import { PerfumeAutocompleteProvider } from '../providers/perfume-autocomplete/perfume-autocomplete';
 
@@ -19,11 +18,10 @@ import { PerfumeAutocompleteProvider } from '../providers/perfume-autocomplete/p
   declarations: [
     MyApp,
     HomePage,
-    PerfumePage
+    SettingsPage
   ],
   imports: [
     BrowserModule,
-    AutoCompleteModule,
     FormsModule,
     IonicModule.forRoot(MyApp),
     HttpModule
@@ -32,7 +30,7 @@ import { PerfumeAutocompleteProvider } from '../providers/perfume-autocomplete/p
   entryComponents: [
     MyApp,
     HomePage,
-    PerfumePage
+    SettingsPage
   ],
   providers: [
     StatusBar,

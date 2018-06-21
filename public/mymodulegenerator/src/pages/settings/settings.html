@@ -1,0 +1,41 @@
+<ion-header>
+    <ion-navbar color="girl">
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <ion-title>
+        Impostazioni path
+      </ion-title>
+    </ion-navbar>
+  </ion-header>
+
+
+<ion-content padding>
+                  <ion-item>
+                      <ion-label color="primary">Progetto</ion-label>
+                      <ion-input placeholder="C:/Users/DANIELE-PC/git/mysaas/MySaas" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+                  </ion-item>
+                  <ion-item>
+                    <ion-label color="primary">Webapp</ion-label>
+                    <ion-input placeholder="mysaas-webapp" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label color="primary">Core</ion-label>
+                  <ion-input placeholder="mysaas-core" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label color="primary">View HTML</ion-label>
+                  <ion-input placeholder="src/main/webapp/backoffice/v2/angular-resources" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+                </ion-item>
+                <ion-item style="margin-bottom: 10px;">
+                  <ion-label color="primary">JavaScript</ion-label>
+                  <ion-input placeholder="src/main/webapp/backoffice/v2/js/angular" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+                </ion-item>
+
+              
+                  <button ion-button color="boy" block (click)="addNote(i)">
+                    <ion-icon name="cloud-upload"></ion-icon>&nbsp;
+                    Salva
+                  </button>
+               
+</ion-content>
