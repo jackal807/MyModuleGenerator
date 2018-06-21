@@ -4,89 +4,52 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>
-      Lista note
+      Genera modulo
     </ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content>
+<ion-content padding>
 
-  <div style="position: relative">
-    <ion-img src="../../assets/imgs/notes-imagery.jpg" class="header-imagery"></ion-img>
-    <div style="position: absolute; top: 60px; left: 10px; right: 10px;">
+  <ion-item>
+    <ion-label color="primary">Nome modulo</ion-label>
+    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.name" clearInput></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label color="primary">Menu label</ion-label>
+    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.menuLabel" clearInput></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label color="primary">Menu padre navbar</ion-label>
+    <ion-input placeholder="Es. boh" [(ngModel)]="moduleObj.menuActive" clearInput></ion-input>
+  </ion-item>
 
-        <ion-card>
-          <ion-card-content>
-              <ion-item>
-                  <ion-label color="primary">Cerca nota</ion-label>
-                  <ion-input placeholder="Es. chinotto" [(ngModel)]="autocomplete.query"
-                  (ionChange)="updateSearch(autocomplete.query)" clearInput></ion-input>
-              </ion-item>
-          </ion-card-content>
-        </ion-card>
-        <ion-card>
-          <!--
-            <ion-card-header>
-              Ricerca no
-            </ion-card-header>
-          -->
+  <br/>
+  <br/>
 
-          
-            <ion-card-content style="min-height:80vh">
-              
-               
-            
-              <ion-list>
-                  
-                <ion-item *ngFor="let i of items">
-                  
-                  <ion-thumbnail item-start>
-                    <img src="{{i.thumb}}">
-                  </ion-thumbnail>
-                
-                  <h2>{{i.name}}</h2>
-                  <button ion-button color="boy" item-end (click)="addNote(i)">Add</button>
-                </ion-item>
-              </ion-list>
-            
-              <br/><br/><br/>
-            
+  <ion-list *ngFor="let submodule of moduleObj.submodules; let i = index;" style="margin-left: 20px;">
+    <ion-item>
+      <ion-label color="primary">Sottomenu {{i+1}}.</ion-label>
+      <ion-input placeholder="Es. StatsSubmoduleOne" [(ngModel)]="submodule.name" clearInput></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label color="primary">Menu label</ion-label>
+      <ion-input placeholder="Es. Sottomodulo statistiche" [(ngModel)]="submodule.menuLabel" clearInput></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label color="primary">Sottomenu di default</ion-label>
+      <ion-toggle [(ngModel)]="submodule.isDefault" (ngModelChange)="onDefaultSelected(i, submodule.isDefault)"></ion-toggle>
+    </ion-item>
+  </ion-list>
 
-              <ion-card color="light" *ngIf="selectedNotes.length">
-                  <ion-card-header>
-                      <ion-title>Note selezionate</ion-title>
-                  </ion-card-header>
-                  <ion-card-content>
-                      <ion-chip *ngFor="let s of selectedNotes; let i = index">
-                          <ion-avatar>
-                            <img src="{{s.thumb}}">
-                          </ion-avatar>
-                          <ion-label>{{s.name}}</ion-label>
-                          <button ion-button clear color="light" (click)="deleteNote(i)">
-                              <ion-icon name="close-circle"></ion-icon>
-                          </button>
-                        </ion-chip>
-                        <br/>
-                        
-                        
-                  </ion-card-content>
-              </ion-card>
+  <button ion-button color="boy" (click)="addSubmodule()">
+    <ion-icon name="add"></ion-icon>&nbsp;
+      Aggiungi sottomodulo
+  </button>
 
-              <div padding text-center *ngIf="selectedNotes.length">
-                <button ion-button color="girl" round item-end (click)="addNote(i)">Cerca per note</button>
-              </div>
-
-             
-            
-            
-            </ion-card-content>
-        </ion-card>
-    </div>
-
-  </div>
-
-
-
-    
+  <button ion-button color="danger" (click)="generate()">
+    <ion-icon name="checkmark"></ion-icon>&nbsp;
+      Genera modulo
+  </button>
 
 </ion-content>

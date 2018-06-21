@@ -7,6 +7,9 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     var project_webapp_url = "mysaas-webapp";
     var project_core_url = "mysaas-core";
 
+    var pathConfigurationCustomPath = "mymodulegenerator_resources/path_configuration_custom.json";
+    var pathConfigurationDefaultPath = "mymodulegenerator_resources/path_configuration_default.json";
+
     /* VELOCITY */
     var velocity_base_url ="src/main/webapp/WEB-INF/template/v2";
     var velocityTemplatePath = "mymodulegenerator_resources/velocity_template.txt";
@@ -421,11 +424,41 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
 
 
+    var getPathConfiguration = () => {
+        let p = new Promise(function(resolve, reject){ 
+            if(fs.existsSync(pathConfigurationCustomPath)) {
+                fs.readFile(pathConfigurationCustomPath, 'utf8',function read(err, data) {
+                    let jsonConfiguration = JSON.parse(data);
+                    resolve(jsonConfiguration);
+                });
+            } else {
+                fs.readFile(pathConfigurationDefaultPath, 'utf8',function read(err, data) {
+                    let jsonConfiguration = JSON.parse(data);
+                    resolve(jsonConfiguration);
+                });
+            }  
+        });
+        return p;
+    }
+
+
+    var savePathConfiguration = (configJson) => {
+        if(fs.existsSync(pathConfigurationCustomPath)) fs.unlinkSync(pathConfigurationCustomPath);
+        textToFile(configJson, pathConfigurationCustomPath, true);
+    }
 
 
 
+    app.get('/api/getPathConfiguration', function(req, res){ 
+        getPathConfiguration().then((pathConfiguration) => res.json({"data" : pathConfiguration}));
+    });
 
 
+    app.post('/api/savePathConfiguration', function(req, res) {
+        let configJson = req.body;
+        savePathConfiguration(configJson);
+        res.json({"status" : "ok"});
+    });
 
 
     app.get('/api/generatetemplates', function(req, res){ 

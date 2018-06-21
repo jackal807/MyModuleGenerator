@@ -11,31 +11,18 @@
 
 
 <ion-content padding>
-                  <ion-item>
-                      <ion-label color="primary">Progetto</ion-label>
-                      <ion-input placeholder="C:/Users/DANIELE-PC/git/mysaas/MySaas" [(ngModel)]="autocomplete.query" clearInput></ion-input>
-                  </ion-item>
-                  <ion-item>
-                    <ion-label color="primary">Webapp</ion-label>
-                    <ion-input placeholder="mysaas-webapp" [(ngModel)]="autocomplete.query" clearInput></ion-input>
+
+              <div *ngIf="items" style="margin-bottom: 25px;">
+                <ion-item *ngFor="let conf of items">
+                      <ion-label color="primary">{{conf.label}}</ion-label>
+                      <ion-input placeholder="" [(ngModel)]="conf.value" clearInput></ion-input>
                 </ion-item>
-                <ion-item>
-                  <ion-label color="primary">Core</ion-label>
-                  <ion-input placeholder="mysaas-core" [(ngModel)]="autocomplete.query" clearInput></ion-input>
-                </ion-item>
-                <ion-item>
-                  <ion-label color="primary">View HTML</ion-label>
-                  <ion-input placeholder="src/main/webapp/backoffice/v2/angular-resources" [(ngModel)]="autocomplete.query" clearInput></ion-input>
-                </ion-item>
-                <ion-item style="margin-bottom: 10px;">
-                  <ion-label color="primary">JavaScript</ion-label>
-                  <ion-input placeholder="src/main/webapp/backoffice/v2/js/angular" [(ngModel)]="autocomplete.query" clearInput></ion-input>
-                </ion-item>
+              </div>
 
               
-                  <button ion-button color="boy" block (click)="addNote(i)">
-                    <ion-icon name="cloud-upload"></ion-icon>&nbsp;
+                <button ion-button color="boy" (click)="savePathConfiguration()">
+                  <ion-icon name="cloud-upload"></ion-icon>&nbsp;
                     Salva
-                  </button>
+                </button>
                
 </ion-content>

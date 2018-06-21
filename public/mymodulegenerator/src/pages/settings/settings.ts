@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { RestProvider } from '../../providers/rest/rest';
 import { MenuController } from 'ionic-angular';
-import { PerfumeAutocompleteProvider } from '../../providers/perfume-autocomplete/perfume-autocomplete';
 
 /**
  * Generated class for the PerfumePage page.
@@ -19,28 +18,37 @@ import { PerfumeAutocompleteProvider } from '../../providers/perfume-autocomplet
 export class SettingsPage {
 
   items : any;
-  autocomplete : any;
-  searchDelay : any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public ws : RestProvider, public menuCtrl: MenuController, public perfumesProvider : PerfumeAutocompleteProvider) {
-      this.autocomplete = { "query" : ""};
-      this.items = [];
+  constructor(public navCtrl: NavController, public navParams: NavParams, public ws : RestProvider, public menuCtrl: MenuController) {
+      this.getPathConfiguration();
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad PerfumePage');
-  }
-
-
-
-  updateSearch(key) {
-    if(key=="") return;
+  getPathConfiguration() {
     let self = this;
-    if(self.searchDelay) clearTimeout(self.searchDelay);
-    self.searchDelay = setTimeout(function() {
-      self.items = [];
-      self.perfumesProvider.getResults(key).subscribe(d => { self.items = d;});
-    }, 500);
+    this.ws.getPathConfiguration()
+        .subscribe(
+        data => { 
+          console.log(data);
+          self.items = data.data;
+        },
+        err => console.log("error is " + err),
+        () => console.log('getPathConfiguration complete')
+        );
   }
+
+
+  savePathConfiguration() {
+    let self = this;
+    this.ws.savePathConfiguration(self.items)
+        .subscribe(
+        data => { 
+          console.log(data);
+        },
+        err => console.log("error is " + err),
+        () => console.log('savePathConfiguration complete')
+        );
+  }
+
+  
 
 }

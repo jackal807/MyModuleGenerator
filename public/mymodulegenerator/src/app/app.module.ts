@@ -11,8 +11,6 @@ import { HomePage } from '../pages/home/home';
 import { SettingsPage } from '../pages/settings/settings';
 import { RestProvider } from '../providers/rest/rest';
 
-import { NotesAutocompleteProvider } from '../providers/notes-autocomplete/notes-autocomplete';
-import { PerfumeAutocompleteProvider } from '../providers/perfume-autocomplete/perfume-autocomplete';
 
 @NgModule({
   declarations: [
@@ -36,9 +34,7 @@ import { PerfumeAutocompleteProvider } from '../providers/perfume-autocomplete/p
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    RestProvider,
-    NotesAutocompleteProvider,
-    PerfumeAutocompleteProvider
+    RestProvider
   ]
 })
 export class AppModule {}

@@ -15,32 +15,21 @@ export class RestProvider {
 
   constructor(public http: Http, public requestOptions: RequestOptions) {
     this.apiBaseUrl = 'api/';
-    //this.apiBaseUrl = 'http://perfumenotes.herokuapp.com/api/';
+    //this.apiBaseUrl = 'http://mymodulegenerator.herokuapp.com/api/';
     
     this.options = new RequestOptions();
     this.options.headers = new Headers();
     this.options.headers.append('Content-Type', 'application/json');
   }
 
-  getNotes() {
-    return this.http.get(this.apiBaseUrl + 'getNoteList')
+  getPathConfiguration() {
+    return this.http.get(this.apiBaseUrl + 'getPathConfiguration')
     .map(res => res.json());
   }
 
-  getNotesByKey(key) {
-    return this.http.get(this.apiBaseUrl + 'getNoteListByKey' + key)
+  savePathConfiguration(data: any) {
+    return this.http.post(this.apiBaseUrl + 'savePathConfiguration', data, this.options)
     .map(res => res.json());
   }
-
-  getPerfumes() {
-    return this.http.get(this.apiBaseUrl + 'getPerfumeList')
-    .map(res => res.json());
-  }
-
-  getPerfumesByKey(key) {
-    return this.http.get(this.apiBaseUrl + 'getPerfumeListByKey' + key)
-    .map(res => res.json());
-  }
-
 
 }

@@ -4,61 +4,44 @@ import { RestProvider } from '../../providers/rest/rest';
 
 import { MenuController } from 'ionic-angular';
 
-import { NotesAutocompleteProvider } from '../../providers/notes-autocomplete/notes-autocomplete';
-
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
 })
 export class HomePage {
 
-  items : any;
-  selectedNotes : any;
-  autocomplete : any;
-  searchDelay : any;
+  moduleObj : any;
 
-  constructor(public navCtrl: NavController, public ws : RestProvider, public menuCtrl: MenuController, public notesProvider : NotesAutocompleteProvider) {
-      this.autocomplete = { "query" : ""};
-      this.items = [];
-      this.selectedNotes = [];
-      //this.getNotes();
+  constructor(public navCtrl: NavController, public ws : RestProvider, public menuCtrl: MenuController) {
+     this.moduleObj = {
+       "menuLabel" : "",
+       "menuActive" : "",
+       "module" : {
+         "name" : "",
+         "menuLabel" : "",
+         "dependencies" : []
+       },
+       "submodules" : []
+     }
   }
 
 
-  updateSearch(key) {
-    if(key=="") return;
-    let self = this;
-    if(self.searchDelay) clearTimeout(self.searchDelay);
-    self.searchDelay = setTimeout(function() {
-      self.items = [];
-      self.notesProvider.getResults(key).subscribe(d => { self.items = d;});
-    }, 500);
+  onDefaultSelected(i, val) {
+      if(val==true)
+      for(var j=0; j<this.moduleObj.submodules.length; j++) {
+        if(j!=i) this.moduleObj.submodules[j].isDefault = false;
+      }
   }
 
-  getNotes() {
-    let self = this;
-    this.ws.getNotes()
-        .subscribe(
-        data => { 
-          console.log(data);
-          self.items = data;
-        },
-        err => console.log("error is " + err),
-        () => console.log('getnotes complete')
-        );
-    }
-
-  addNote(note) {
-    this.items = [];
-    this.autocomplete = { "query" : ""};
-    this.selectedNotes.push(note);
+  addSubmodule() {
+    let newSubModule = {
+      "name" : "",
+      "dependencies" : "",
+      "isDefault" : false,
+      "menuLabel" : ""
+    };
+    this.moduleObj.submodules.push(newSubModule);
   }
-
-  deleteNote(i) {
-    this.selectedNotes.splice(i,1);
-  }
-
-
 
   openMenu() {
     this.menuCtrl.open();
