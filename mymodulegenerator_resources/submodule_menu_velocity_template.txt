@@ -1,0 +1,5 @@
+<li #if($currentview == '##submodule_name_lower_case##')class="active"#end>
+	<a href="##module_name_lower_case_slash##?menuactive=##menu_active##&submenuactive=##module_name_lower_case##&action=##module_name_lower_case##&currentview=##submodule_name_lower_case##&idvendor=$vendorMenu.Id#!##module_name_lower_case_slash####submodule_name_lower_case_slash##/">
+		<span class="nav-label">##submodule_menu_label##</span>
+	</a>
+</li>  

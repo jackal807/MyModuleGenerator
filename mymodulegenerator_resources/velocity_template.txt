@@ -1,0 +1,30 @@
+#set($templateName = '##module_name_folder##')
+#set($templateTitle = "##template_title##")
+#parse('costanti.vm')
+#set($hasTweeterBoostrap = true)
+#set($menuactive = '##menu_active##')
+#set($vendorMenu = $vendor)
+
+<script type="text/javascript">
+	var idVendor = "${vendor.vendor_id}";
+	var idCliente = "${myConfiguration.Cliente.Idcliente}";
+</script>
+
+#parse("${templateRoot}backoffice/header.vm")
+
+#parse("${templateRoot}backoffice/_page-title.vm")
+
+<div ui-view></div>
+
+<link rel="stylesheet" href="$staticRootV2/css##module_name_folder_slash####module_name_folder_slash##-common.css"/>
+
+<script type="text/javascript" src="$staticRootV2/js/angular##module_name_folder_slash##/conf/config.js"></script>
+<script type="text/javascript" src="$staticRootV2/js/angular##module_name_folder_slash##/directives/directives.js"></script>
+<script type="text/javascript" src="$staticRootV2/js/angular##module_name_folder_slash##/filters/filters.js"></script>
+
+##services_imports##
+##controllers_imports##
+
+
+
+#parse("${templateRoot}backoffice/footer.vm")

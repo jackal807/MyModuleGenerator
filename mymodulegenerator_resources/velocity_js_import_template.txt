@@ -1,0 +1,1 @@
+<script type="text/javascript" src="$staticRootV2/js/angular##module_name_folder_slash####service_or_controller####submodule_file_name_camel##"></script>

@@ -1,0 +1,3 @@
+<ul class="nav nav-second-level nav-vendor">  
+			##submodule_menu_items##
+</ul>

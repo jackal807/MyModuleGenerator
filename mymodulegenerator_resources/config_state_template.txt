@@ -1,0 +1,5 @@
+.state('##submodule_name_lower_case##', {
+        url: "##module_name_lower_case##/##submodule_name_lower_case##/",
+        templateUrl: window.global + '/##module_name_folder##/views/##submodule_name_folder##.html',
+        controller: '##submodule_name_camel##Ctrl'
+})
