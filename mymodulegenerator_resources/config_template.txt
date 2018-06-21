@@ -22,27 +22,7 @@ function ##module_name_lower_case##Config($stateProvider, $urlRouterProvider, $o
     });
     
 
-    $stateProvider.state('crsstats', {
-        url: "/statscharts/crsstats/",
-        templateUrl: window.global + '/stats-charts/views/crs-stats.html',
-        controller: 'CrsStatsCtrl'
-        
-    }).state('channelstats', {
-        url: "/statscharts/channelstats",
-        templateUrl: window.global + '/stats-charts/views/channel-stats.html',
-        controller: 'ChannelStatsCtrl'
-        
-    }).state('bookingenginestats', {
-        url: "/statscharts/bookingenginestats",
-        templateUrl: window.global + '/stats-charts/views/booking-engine-stats.html',
-        controller: 'BookingEngineStatsCtrl'
-        
-    }).state('pmsstats', {
-        url: "/statscharts/pmsstats",
-        templateUrl: window.global + '/stats-charts/views/pms-stats.html',
-        controller: 'PmsStatsCtrl'
-        
-    });
+    $stateProvider##states_list##
     
     
 };
