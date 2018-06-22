@@ -1,7 +1,7 @@
 #if($b2b_user.isSuperUser() && $myConfiguration.Cliente.Idcliente != 'democrs')
 	<li class=" #if($submenuactive =='##module_name_lower_case##')active#end">
-		<a href="/##module_name_lower_case##?menuactive=##menu_active##&submenuactive=##module_name_lower_case##&action=##module_name_lower_case##&currentview=##default_submodule_name_lower_case##&idvendor=$vendorMenu.Id#!##module_name_lower_case_slash####default_submodule_name_lower_case_slash##/">
-			<span class="nav-label">Statistiche</span>
+		<a href="##module_name_lower_case_slash##?menuactive=##menu_active##&submenuactive=##module_name_lower_case##&action=##module_name_lower_case##&currentview=##default_submodule_name_lower_case##&idvendor=$vendorMenu.Id#!##module_name_lower_case_slash####default_submodule_name_lower_case_slash##/">
+			<span class="nav-label">##module_menu_label##</span>
 		</a>
 							          
 		##submodule_menu_container##

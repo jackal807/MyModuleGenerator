@@ -15,6 +15,11 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     var velocityTemplatePath = "mymodulegenerator_resources/velocity_template.txt";
     var velocityJsImportTemplatePath = "mymodulegenerator_resources/velocity_js_import_template.txt";
 
+    /* NAVBAR SNIPPET */
+    var moduleMenuVelocityTemplatePath = "mymodulegenerator_resources/module_menu_velocity_template.txt";
+    var submoduleMenuContainerVelocityTemplatePath = "mymodulegenerator_resources/submodule_menu_container_velocity_template.txt";
+    var submoduleMenuVelocityTemplatePath = "mymodulegenerator_resources/submodule_menu_velocity_template.txt";
+
     /* HTML */
     var view_base_url ="src/main/webapp/backoffice/v2/angular-resources";
     var viewsTemplatePath = "mymodulegenerator_resources/view_template.txt";
@@ -30,11 +35,19 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     var configTemplatePath = "mymodulegenerator_resources/config_template.txt";
     var configStateTemplatePath = "mymodulegenerator_resources/config_state_template.txt";
 
-    
+    var createdFiles = [];
+    var deletedFiles = [];
+    var navbarMenuSnippet = "";
+
+    var addCreatedFile = (path, filename, folderOrFile) => {
+        let i = {"path" : path, "name" : filename, "type" : folderOrFile };
+        createdFiles.push(i);
+    }
 
     /* JAVA */
     var java_base_url ="src/main/java/com/mycomp";
     var javaActionTemplatePath = "mymodulegenerator_resources/java_action_template.txt";
+    var javaServletControllerTemplatePath = "mymodulegenerator_resources/servlet_controller_template.txt";
 
     var log = (msg, title) => {
         //aggiungere eventualmente la generazione notifiche
@@ -79,10 +92,34 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
         return camelToDelimiter(moduleNameCamel);
     }
 
+    var pathToFileName = (path) => {
+        let pathSplit = path.split("/");
+        return pathSplit[pathSplit.length-1];
+    }
+
+    var deleteFolderRecursive = (path) => {
+        if( fs.existsSync(path) ) {
+            fs.readdirSync(path).forEach(function(file) {
+              var curPath = path + "/" + file;
+                if(fs.statSync(curPath).isDirectory()) { // recurse
+                    deleteFolderRecursive(curPath);
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                    if(deletedFiles) deletedFiles.push({"path" : curPath, "name" : pathToFileName(curPath), "type" : "file"});
+                }
+            });
+            fs.rmdirSync(path);
+            if(deletedFiles) deletedFiles.push({"path" : path, "name" : pathToFileName(path), "type" : "folder"});
+          }
+      };
+
 
     var createDirList = (dirList) => {
         for(let i=0; i<dirList.length; i++) 
-            if(!fs.existsSync(dirList[i])) fs.mkdirSync(dirList[i]);
+            if(!fs.existsSync(dirList[i])) {
+                fs.mkdirSync(dirList[i]);
+                addCreatedFile(dirList[i], pathToFileName(dirList[i]), "folder");
+            }
     }
 
 
@@ -123,6 +160,14 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     }
 
 
+    var generateJavaFolder = (moduleNameCamel) => {
+        let javaUrl = getJavaActionUrl();
+        let moduleJavaUrl = javaUrl + "/" + moduleNameCamel.toLowerCase();
+        let moduleJavaActionUrl = moduleJavaUrl + "/action"
+        createDirList([moduleJavaUrl, moduleJavaActionUrl]);
+    }
+
+
 
     var generateViews = (module, arr_submodules) => {
         //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
@@ -152,6 +197,112 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     }
 
 
+    var generateNavbarSnippet = (module, arr_submodules) => {
+        var p = new Promise(function(resolve, reject){
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            let hasSubmenu = true;
+            if(!arr_submodules || !arr_submodules.length) {
+                arr_submodules = [module];
+                hasSubmenu = false;
+            }
+
+            //template padre
+            let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
+            let moduleNameLowerCaseSlashRegex = new RegExp("##module_name_lower_case_slash##", 'g');
+            let defaultSubmoduleNameLowerCaseRegex = new RegExp("##default_submodule_name_lower_case##", 'g');
+            let defaultSubmoduleNameLowerCaseSlashRegex = new RegExp("##default_submodule_name_lower_case_slash##", 'g');
+            let menuActiveRegex = new RegExp("##menu_active##", 'g');
+            let moduleMenuLabelRegex = new RegExp("##module_menu_label##", 'g');
+            let submoduleMenuContainerRegex = new RegExp("##submodule_menu_container##", 'g');
+
+            //submenu container
+            let submoduleMenuItemsRegex = new RegExp("##submodule_menu_items##", 'g');
+
+            //submenu items
+            //##menu_active##
+            let submoduleNameLowerCaseRegex = new RegExp("##submodule_name_lower_case##", 'g');
+            let submoduleNameLowerCaseSlashRegex = new RegExp("##submodule_name_lower_case_slash##", 'g');
+            //##module_name_lower_case##
+            //##module_name_lower_case_slash##
+            let submoduleMenuLabelRegex = new RegExp("##submodule_menu_label##", 'g');
+
+            let moduleNameLowerCase = module.name.toLowerCase();
+            let menuActive = module.menuActive;
+            let moduleMenuLabel = module.menuLabel;
+
+            let defaultSubmoduleNameLowerCase = moduleNameLowerCase;
+            for(let i=0; i<arr_submodules.length; i++) {
+                if(arr_submodules[i].isDefault) defaultSubmoduleNameLowerCase = arr_submodules[i].name.toLowerCase();
+            }
+            
+            //lettura del template per il navbar snippet
+            fs.readFile(moduleMenuVelocityTemplatePath, 'utf8',function read(err, moduleMenuVelocityTemplateFileContent) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + moduleMenuVelocityTemplatePath);
+                    reject(err);
+                } else {
+                    
+                    let moduleMenuVelocityTemplateBodyTemp = moduleMenuVelocityTemplateFileContent
+                    .replace(moduleNameLowerCaseRegex, moduleNameLowerCase)
+                    .replace(moduleNameLowerCaseSlashRegex, "/" + moduleNameLowerCase)
+                    .replace(defaultSubmoduleNameLowerCaseRegex, defaultSubmoduleNameLowerCase)
+                    .replace(defaultSubmoduleNameLowerCaseSlashRegex, "/" + defaultSubmoduleNameLowerCase)
+                    .replace(menuActiveRegex, menuActive)
+                    .replace(moduleMenuLabelRegex, moduleMenuLabel);
+
+                    if(!hasSubmenu) {
+                        navbarMenuSnippet = moduleMenuVelocityTemplateBodyTemp
+                        .replace(submoduleMenuContainerRegex, "")
+                        resolve(navbarMenuSnippet);
+                    } else {
+                        //lettura template container per i sottomenu
+                        fs.readFile(submoduleMenuContainerVelocityTemplatePath, 'utf8',function read(err, submoduleMenuContainerVelocityTemplateFileContent) {
+                            if (err)  {
+                                log("Errore durante la lettura del file : " + submoduleMenuContainerVelocityTemplatePath);
+                                reject(err);
+                            } else { 
+                                //lettura template singolo item del submenu
+                                fs.readFile(submoduleMenuVelocityTemplatePath, 'utf8',function read(err, submoduleMenuVelocityTemplateFileContent) {
+                                    if (err)  {
+                                        log("Errore durante la lettura del file : " + submoduleMenuVelocityTemplatePath);
+                                        reject(err);
+                                    } else { 
+                                        let submoduleItemList = "";
+                                        for(let i=0; i<arr_submodules.length; i++) {
+                                            let submoduleNameLowerCase = arr_submodules[i].name.toLowerCase();
+                                            let submoduleMenuLabel = arr_submodules[i].menuLabel;
+
+                                            let submoduleMenuItemBodyTemp = submoduleMenuVelocityTemplateFileContent
+                                            .replace(submoduleNameLowerCaseRegex, submoduleNameLowerCase)
+                                            .replace(submoduleNameLowerCaseSlashRegex, "/" + submoduleNameLowerCase)
+                                            .replace(menuActiveRegex, menuActive)
+                                            .replace(moduleNameLowerCaseRegex, moduleNameLowerCase)
+                                            .replace(moduleNameLowerCaseSlashRegex, "/" + moduleNameLowerCase)
+                                            .replace(submoduleMenuLabelRegex, submoduleMenuLabel);
+
+                                            submoduleItemList += submoduleMenuItemBodyTemp;
+                                        
+                                        }
+
+                                        //FINE LOOP SUBMODULES
+                                        let submoduleContainerBodyTemp = submoduleMenuContainerVelocityTemplateFileContent
+                                        .replace(submoduleMenuItemsRegex, submoduleItemList);
+                                        let navbarSnippetBodyTemp = moduleMenuVelocityTemplateBodyTemp
+                                        .replace(submoduleMenuContainerRegex, submoduleContainerBodyTemp);
+                                        resolve(navbarSnippetBodyTemp);
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+        return p;
+    }
+
+
 
     var generateStyles = (module, arr_submodules) => {
         //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
@@ -166,15 +317,15 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
     var generateJavaAction = (module) => {
         let moduleNameCamel = module.name;
-        let moduleNameLower = module.name.toLowerCase();
         let moduleNameFolder = moduleNameToFolderName(module.name);
+        let moduleNameLower = module.name.toLowerCase();
 
 
         let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
-        let moduleNameLowerRegex = new RegExp("##module_name_lower_case##", 'g');
         let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
+        let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
 
-        let javaActionPath = getJavaActionUrl() + "/" + moduleNameLower;
+        let javaActionPath = getJavaActionUrl() + "/" + moduleNameLower + "/action";
         if(!fs.existsSync(javaActionPath)) fs.mkdirSync(javaActionPath);
         let javaActionFilePath = javaActionPath + "/" + moduleNameCamel + "Action.java" ;
 
@@ -185,12 +336,44 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
             } else { 
                 let javaActionBodyTemp = javaActionTemplateFileContent
                 .replace(moduleNameCamelRegex, moduleNameCamel)
-                .replace(moduleNameLowerRegex, moduleNameLower)
-                .replace(moduleNameFolderRegex,moduleNameFolder);
+                .replace(moduleNameLowerCaseRegex, moduleNameLower)
+                .replace(moduleNameFolderRegex, moduleNameFolder);
 
                 textToFile(javaActionBodyTemp, javaActionFilePath, false);
             }
         });
+    }
+
+
+    var generateServletController = (module) => {
+
+        let moduleNameCamel = module.name;
+        let moduleNameLowerCase = module.name.toLowerCase();
+        let serialUid = new Date();
+   
+        let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
+        let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
+        let moduleNameLowerCaseSlashRegex = new RegExp("##module_name_lower_case_slash##", 'g');
+        let serialUidRegex = new RegExp("##serial_uid##", 'g');
+
+        let javaServletControllerPath = getJavaActionUrl() + "/" + moduleNameLowerCase;
+        if(!fs.existsSync(javaServletControllerPath)) fs.mkdirSync(javaServletControllerPath);
+        let javaServletControllerFilePath = javaServletControllerPath + "/Controller" + moduleNameCamel + "Servlet.java" ;
+
+        fs.readFile(javaServletControllerTemplatePath, 'utf8',function read(err, javaServletControllerTemplateFileContent) {
+            if (err)  {
+                log("Errore durante la lettura del file : " + javaServletControllerTemplatePath);
+                Promise.reject(err);
+            } else { 
+                let javaServletControllerBodyTemp = javaServletControllerTemplateFileContent
+                .replace(moduleNameCamelRegex, moduleNameCamel)
+                .replace(moduleNameLowerCaseRegex, moduleNameLowerCase)
+                .replace(moduleNameLowerCaseSlashRegex, "/" + moduleNameLowerCase)
+                .replace(serialUidRegex, serialUid.getTime());
+                textToFile(javaServletControllerBodyTemp, javaServletControllerFilePath, false);
+            }
+        });
+
     }
 
 
@@ -309,7 +492,7 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
                 Promise.reject(err);
             } else {
                 //nel caso dei services creiamo anche un commonmodulenamesrvc che sarà iniettato in tutti i controllers
-                let templateBodyTemp = data.replace(submoduleNameCamelRegex, moduleNameCamel);
+                let templateBodyTemp = data.replace(submoduleNameCamelRegex, "Common" + moduleNameCamel);
                 let submoduleServiceFilePath = servicesPath + "/" + "Common" + moduleNameCamel + "Srvc" + ".js"; 
                 textToFile(templateBodyTemp, submoduleServiceFilePath, false);
 
@@ -461,43 +644,62 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     });
 
 
-    app.get('/api/generatetemplates', function(req, res){ 
+
+
+    app.post('/api/deleteModule', function(req, res) {
+        let pathList = req.body;
+        deletedFiles = [];
+        for(let i=0; i<pathList.length; i++) {
+            console.log("Provo a cancellare il file con path : ");
+            console.log(pathList[i].path);
+            if(fs.existsSync(pathList[i].path)) 
+                if(fs.statSync(pathList[i].path).isDirectory()) deleteFolderRecursive(pathList[i].path);
+                else {
+                    fs.unlinkSync(pathList[i].path);
+                    deletedFiles.push(pathList[i]);
+                }
+        }
+        res.json({"status" : "ok", "deletedFiles" : deletedFiles});
+    });
+
+
+    app.post('/api/generate', function(req, res){ 
         
-        let title = "Prova";
-        let menuActive = "prova";
 
-        let modulea = {
-            "name" : "MioPrimoModulo",
-            "dependencies" : []
-        };
+        let reqBody = req.body;
+        let module = reqBody.module;
+        let submodules = reqBody.submodules;
+        let menuLabel = module.menuLabel;
+        let menuActive = module.menuActive;
 
-        let submodules = [{
-            "name" : "MioPrimoSubModulo",
-            "dependencies" : []
-        }, {
-            "name" : "MioSecondoSubModulo",
-            "dependencies" : ["blabla"]
-        }];
+        Promise.all([
+        generateJsFolders(module.name),
+        generateHtmlFolders(module.name),
+        generateCssFolder(module.name),
+        generateJavaFolder(module.name),
 
-        generateJsFolders(modulea.name);
-        generateHtmlFolders(modulea.name);
-        generateCssFolder(modulea.name);
+        generateVelocityFolder(module.name),
 
-        generateVelocityFolder(modulea.name);
+        generateViews(module, submodules),
 
-        generateViews(modulea, submodules);
+        generateStyles(module, submodules),
 
-        generateStyles(modulea, submodules);
+        generateControllers(module, submodules),
+        generateServices(module, submodules),
+        generateConfig(module, submodules),
+        generateDirectives(module),
+        generateFilters(module),
 
-        generateControllers(modulea, submodules);
-        generateServices(modulea, submodules);
-        generateConfig(modulea, submodules);
-        generateDirectives(modulea);
-        generateFilters(modulea);
+        generateVelocity(module, submodules, menuLabel, menuActive),
 
-        generateVelocity(modulea, submodules, title, menuActive);
+        generateServletController(module),
+        generateJavaAction(module)])
+        .then(function(allData) {
 
-        generateJavaAction(modulea);
+            generateNavbarSnippet(module,submodules).then((navbarSnippet) => {
+                res.json({"createdFiles" : createdFiles, "navbarSnippet" : navbarSnippet});
+            });
+        });
 
     });
 
@@ -519,6 +721,7 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
             let p = new Promise(function(resolve, reject){
                 fs.writeFile(fileName, ttw,function (err) {
                     if (err)  reject(err);
+                    addCreatedFile(fileName, pathToFileName(fileName), "file");
                     resolve();
                 });
             });

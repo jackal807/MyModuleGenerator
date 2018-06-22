@@ -11,18 +11,22 @@ import { MenuController } from 'ionic-angular';
 export class HomePage {
 
   moduleObj : any;
+  created : boolean;
+  createdFileList : any;
+  navbarSnippet : string;
 
   constructor(public navCtrl: NavController, public ws : RestProvider, public menuCtrl: MenuController) {
      this.moduleObj = {
-       "menuLabel" : "",
-       "menuActive" : "",
        "module" : {
+         "menuActive" : "",
          "name" : "",
          "menuLabel" : "",
          "dependencies" : []
        },
        "submodules" : []
-     }
+     };
+
+     this.created = false;
   }
 
 
@@ -41,6 +45,38 @@ export class HomePage {
       "menuLabel" : ""
     };
     this.moduleObj.submodules.push(newSubModule);
+  }
+
+
+  generate() {
+    let self = this;
+    this.ws.generate(self.moduleObj)
+        .subscribe(
+        data => { 
+          console.log(data);
+          self.created = true;
+          self.createdFileList = data.createdFiles;
+          self.navbarSnippet = data.navbarSnippet;
+          console.log("Valore di createdFileList : ");
+          console.log(self.createdFileList);
+        },
+        err => console.log("error is " + err),
+        () => console.log('module generation complete')
+        );
+  }
+
+  deleteModule() {
+    let self = this;
+    this.ws.deleteModule(self.createdFileList)
+        .subscribe(
+        data => { 
+          console.log(data);
+          self.created = false;
+          self.createdFileList = [];
+        },
+        err => console.log("error is " + err),
+        () => console.log('module deletion complete')
+        );
   }
 
   openMenu() {

@@ -32,4 +32,15 @@ export class RestProvider {
     .map(res => res.json());
   }
 
+
+  generate(data: any) {
+    return this.http.post(this.apiBaseUrl + 'generate', data, this.options)
+    .map(res => res.json());
+  }
+
+  deleteModule(data: any) {
+    return this.http.post(this.apiBaseUrl + 'deleteModule', data, this.options)
+    .map(res => res.json());
+  }
+
 }

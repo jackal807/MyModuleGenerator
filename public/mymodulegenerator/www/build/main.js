@@ -52,7 +52,7 @@ var SettingsPage = /** @class */ (function () {
     };
     SettingsPage = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
-            selector: 'page-settings',template:/*ion-inline-start:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\pages\settings\settings.html"*/'<ion-header>\n\n    <ion-navbar color="girl">\n\n      <button ion-button menuToggle>\n\n        <ion-icon name="menu"></ion-icon>\n\n      </button>\n\n      <ion-title>\n\n        Impostazioni path\n\n      </ion-title>\n\n    </ion-navbar>\n\n  </ion-header>\n\n\n\n\n\n<ion-content padding>\n\n\n\n              <div *ngIf="items" style="margin-bottom: 25px;">\n\n                <ion-item *ngFor="let conf of items">\n\n                      <ion-label color="primary">{{conf.label}}</ion-label>\n\n                      <ion-input placeholder="" [(ngModel)]="conf.value" clearInput></ion-input>\n\n                </ion-item>\n\n              </div>\n\n\n\n              \n\n                <button ion-button color="boy" (click)="savePathConfiguration()">\n\n                  <ion-icon name="cloud-upload"></ion-icon>&nbsp;\n\n                    Salva\n\n                </button>\n\n               \n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\pages\settings\settings.html"*/,
+            selector: 'page-settings',template:/*ion-inline-start:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\pages\settings\settings.html"*/'<ion-header>\n\n    <ion-navbar color="girl">\n\n      <button ion-button menuToggle>\n\n        <ion-icon name="menu"></ion-icon>\n\n      </button>\n\n      <ion-title>\n\n        Impostazioni path\n\n      </ion-title>\n\n    </ion-navbar>\n\n  </ion-header>\n\n\n\n\n\n<ion-content padding>\n\n\n\n              <div *ngIf="items" style="margin-bottom: 25px;">\n\n                <ion-item *ngFor="let conf of items">\n\n                      <ion-label color="primary">{{conf.label}}</ion-label>\n\n                      <ion-input placeholder="" [(ngModel)]="conf.value" clearInput></ion-input>\n\n                </ion-item>\n\n              </div>\n\n\n\n              \n\n                <button ion-button color="boy" (click)="savePathConfiguration()">\n\n                  <ion-icon name="cloud-upload"></ion-icon>&nbsp;\n\n                    Salva\n\n                </button>\n\n               \n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\pages\settings\settings.html"*/,
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* NavController */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["h" /* NavParams */], __WEBPACK_IMPORTED_MODULE_2__providers_rest_rest__["a" /* RestProvider */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* MenuController */]])
     ], SettingsPage);
@@ -132,15 +132,15 @@ var HomePage = /** @class */ (function () {
         this.ws = ws;
         this.menuCtrl = menuCtrl;
         this.moduleObj = {
-            "menuLabel": "",
-            "menuActive": "",
             "module": {
+                "menuActive": "",
                 "name": "",
                 "menuLabel": "",
                 "dependencies": []
             },
             "submodules": []
         };
+        this.created = false;
     }
     HomePage.prototype.onDefaultSelected = function (i, val) {
         if (val == true)
@@ -158,6 +158,27 @@ var HomePage = /** @class */ (function () {
         };
         this.moduleObj.submodules.push(newSubModule);
     };
+    HomePage.prototype.generate = function () {
+        var self = this;
+        this.ws.generate(self.moduleObj)
+            .subscribe(function (data) {
+            console.log(data);
+            self.created = true;
+            self.createdFileList = data.createdFiles;
+            self.navbarSnippet = data.navbarSnippet;
+            console.log("Valore di createdFileList : ");
+            console.log(self.createdFileList);
+        }, function (err) { return console.log("error is " + err); }, function () { return console.log('module generation complete'); });
+    };
+    HomePage.prototype.deleteModule = function () {
+        var self = this;
+        this.ws.deleteModule(self.createdFileList)
+            .subscribe(function (data) {
+            console.log(data);
+            self.created = false;
+            self.createdFileList = [];
+        }, function (err) { return console.log("error is " + err); }, function () { return console.log('module deletion complete'); });
+    };
     HomePage.prototype.openMenu = function () {
         this.menuCtrl.open();
     };
@@ -169,7 +190,7 @@ var HomePage = /** @class */ (function () {
     };
     HomePage = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
-            selector: 'page-home',template:/*ion-inline-start:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\pages\home\home.html"*/'<ion-header>\n\n  <ion-navbar color="girl">\n\n    <button ion-button menuToggle>\n\n      <ion-icon name="menu"></ion-icon>\n\n    </button>\n\n    <ion-title>\n\n      Genera modulo\n\n    </ion-title>\n\n  </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content padding>\n\n\n\n  <ion-item>\n\n    <ion-label color="primary">Nome modulo</ion-label>\n\n    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.name" clearInput></ion-input>\n\n  </ion-item>\n\n  <ion-item>\n\n    <ion-label color="primary">Menu label</ion-label>\n\n    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.menuLabel" clearInput></ion-input>\n\n  </ion-item>\n\n  <ion-item>\n\n    <ion-label color="primary">Menu padre navbar</ion-label>\n\n    <ion-input placeholder="Es. boh" [(ngModel)]="moduleObj.menuActive" clearInput></ion-input>\n\n  </ion-item>\n\n\n\n  <br/>\n\n  <br/>\n\n\n\n  <ion-list *ngFor="let submodule of moduleObj.submodules; let i = index;" style="margin-left: 20px;">\n\n    <ion-item>\n\n      <ion-label color="primary">Sottomenu {{i+1}}.</ion-label>\n\n      <ion-input placeholder="Es. StatsSubmoduleOne" [(ngModel)]="submodule.name" clearInput></ion-input>\n\n    </ion-item>\n\n    <ion-item>\n\n      <ion-label color="primary">Menu label</ion-label>\n\n      <ion-input placeholder="Es. Sottomodulo statistiche" [(ngModel)]="submodule.menuLabel" clearInput></ion-input>\n\n    </ion-item>\n\n    <ion-item>\n\n      <ion-label color="primary">Sottomenu di default</ion-label>\n\n      <ion-toggle [(ngModel)]="submodule.isDefault" (ngModelChange)="onDefaultSelected(i, submodule.isDefault)"></ion-toggle>\n\n    </ion-item>\n\n  </ion-list>\n\n\n\n  <button ion-button color="boy" (click)="addSubmodule()">\n\n    <ion-icon name="add"></ion-icon>&nbsp;\n\n      Aggiungi sottomodulo\n\n  </button>\n\n\n\n  <button ion-button color="danger" (click)="generate()">\n\n    <ion-icon name="checkmark"></ion-icon>&nbsp;\n\n      Genera modulo\n\n  </button>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\pages\home\home.html"*/
+            selector: 'page-home',template:/*ion-inline-start:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\pages\home\home.html"*/'<ion-header>\n\n  <ion-navbar color="girl">\n\n    <button ion-button menuToggle>\n\n      <ion-icon name="menu"></ion-icon>\n\n    </button>\n\n    <ion-title>\n\n      Genera modulo\n\n    </ion-title>\n\n  </ion-navbar>\n\n</ion-header>\n\n\n\n<ion-content padding>\n\n <div *ngIf="!created">\n\n  <ion-item>\n\n    <ion-label color="primary">Nome modulo</ion-label>\n\n    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.module.name" clearInput></ion-input>\n\n  </ion-item>\n\n  <ion-item>\n\n    <ion-label color="primary">Menu label</ion-label>\n\n    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.module.menuLabel" clearInput></ion-input>\n\n  </ion-item>\n\n  <ion-item>\n\n    <ion-label color="primary">Menu padre navbar</ion-label>\n\n    <ion-input placeholder="Es. catalogo" [(ngModel)]="moduleObj.module.menuActive" clearInput></ion-input>\n\n  </ion-item>\n\n\n\n  <br/>\n\n  <br/>\n\n\n\n  <ion-list *ngFor="let submodule of moduleObj.submodules; let i = index;" style="margin-left: 20px;">\n\n    <ion-item>\n\n      <ion-label color="primary">Nome sottomodulo {{i+1}}.</ion-label>\n\n      <ion-input placeholder="Es. StatsSubmoduleOne" [(ngModel)]="submodule.name" clearInput></ion-input>\n\n    </ion-item>\n\n    <ion-item>\n\n      <ion-label color="primary">Menu label sottomodulo</ion-label>\n\n      <ion-input placeholder="Es. Sottomodulo statistiche" [(ngModel)]="submodule.menuLabel" clearInput></ion-input>\n\n    </ion-item>\n\n    <ion-item>\n\n      <ion-toggle [(ngModel)]="submodule.isDefault" (ngModelChange)="onDefaultSelected(i, submodule.isDefault)"></ion-toggle>\n\n      <ion-label color="primary">È sottomenu di default</ion-label>\n\n    </ion-item>\n\n  </ion-list>\n\n\n\n  <button ion-button color="boy" (click)="addSubmodule()">\n\n    <ion-icon name="add"></ion-icon>&nbsp;\n\n      Aggiungi sottomodulo\n\n  </button>\n\n\n\n  <button ion-button color="danger" (click)="generate()">\n\n    <ion-icon name="checkmark"></ion-icon>&nbsp;\n\n      Genera modulo\n\n  </button>\n\n</div>\n\n\n\n<div *ngIf="created">\n\n\n\n  <div *ngIf="createdFileList && createdFileList.length" style="margin-top: 30px;">\n\n    <h1>Files e cartelle creati</h1>\n\n    <ion-list>\n\n      <ion-item *ngFor="let file of createdFileList; let i = index;">\n\n        <h2>{{file.name}}</h2>\n\n        <p>{{file.path}}</p>\n\n        <ion-icon *ngIf="file.type == \'folder\'" name="folder" color="boy" item-end></ion-icon>\n\n        <ion-icon *ngIf="file.type == \'file\'" name="document" color="girl" item-end></ion-icon>\n\n      </ion-item>\n\n    </ion-list>\n\n  </div>\n\n  \n\n  <ion-item *ngIf="navbarSnippet">\n\n      <ion-label stacked>Navbar menu snippet</ion-label>\n\n      <ion-textarea [(ngModel)]="navbarSnippet"></ion-textarea>\n\n  </ion-item>\n\n\n\n\n\n  <button ion-button color="red" (click)="deleteModule()">\n\n    <ion-icon name="trash"></ion-icon>&nbsp;\n\n      Elimina modulo\n\n  </button>\n\n</div>\n\n\n\n</ion-content>\n\n'/*ion-inline-end:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\pages\home\home.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["g" /* NavController */], __WEBPACK_IMPORTED_MODULE_2__providers_rest_rest__["a" /* RestProvider */], __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* MenuController */]])
     ], HomePage);
@@ -318,7 +339,7 @@ var MyApp = /** @class */ (function () {
         __metadata("design:type", __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["f" /* Nav */])
     ], MyApp.prototype, "nav", void 0);
     MyApp = __decorate([
-        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({template:/*ion-inline-start:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\app\app.html"*/'<ion-menu [content]="content">\n\n        <ion-header>\n\n          <ion-toolbar color="girl">\n\n            <ion-title>Menu</ion-title>\n\n          </ion-toolbar>\n\n        </ion-header>\n\n      \n\n        <ion-content>\n\n          <ion-list>\n\n            <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">\n\n              {{p.title}}\n\n            </button>\n\n          </ion-list>\n\n        </ion-content>\n\n      \n\n</ion-menu>\n\n      \n\n<!-- Disable swipe-to-go-back because it\'s poor UX to combine STGB with side menus -->\n\n<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>'/*ion-inline-end:"C:\Users\daniele\MyModuleManager\mymodulegenerator\public\mymodulegenerator\src\app\app.html"*/
+        Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({template:/*ion-inline-start:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\app\app.html"*/'<ion-menu [content]="content">\n\n        <ion-header>\n\n          <ion-toolbar color="girl">\n\n            <ion-title>Menu</ion-title>\n\n          </ion-toolbar>\n\n        </ion-header>\n\n      \n\n        <ion-content>\n\n          <ion-list>\n\n            <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">\n\n              {{p.title}}\n\n            </button>\n\n          </ion-list>\n\n        </ion-content>\n\n      \n\n</ion-menu>\n\n      \n\n<!-- Disable swipe-to-go-back because it\'s poor UX to combine STGB with side menus -->\n\n<ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>'/*ion-inline-end:"C:\Users\DANIELE-PC\MyModuleGenerator\mymodulegenerator\public\mymodulegenerator\src\app\app.html"*/
         }),
         __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["i" /* Platform */], __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */], __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */]])
     ], MyApp);
@@ -366,6 +387,14 @@ var RestProvider = /** @class */ (function () {
     };
     RestProvider.prototype.savePathConfiguration = function (data) {
         return this.http.post(this.apiBaseUrl + 'savePathConfiguration', data, this.options)
+            .map(function (res) { return res.json(); });
+    };
+    RestProvider.prototype.generate = function (data) {
+        return this.http.post(this.apiBaseUrl + 'generate', data, this.options)
+            .map(function (res) { return res.json(); });
+    };
+    RestProvider.prototype.deleteModule = function (data) {
+        return this.http.post(this.apiBaseUrl + 'deleteModule', data, this.options)
             .map(function (res) { return res.json(); });
     };
     RestProvider = __decorate([

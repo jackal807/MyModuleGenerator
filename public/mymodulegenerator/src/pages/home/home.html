@@ -10,18 +10,18 @@
 </ion-header>
 
 <ion-content padding>
-
+ <div *ngIf="!created">
   <ion-item>
     <ion-label color="primary">Nome modulo</ion-label>
-    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.name" clearInput></ion-input>
+    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.module.name" clearInput></ion-input>
   </ion-item>
   <ion-item>
     <ion-label color="primary">Menu label</ion-label>
-    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.menuLabel" clearInput></ion-input>
+    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.module.menuLabel" clearInput></ion-input>
   </ion-item>
   <ion-item>
     <ion-label color="primary">Menu padre navbar</ion-label>
-    <ion-input placeholder="Es. boh" [(ngModel)]="moduleObj.menuActive" clearInput></ion-input>
+    <ion-input placeholder="Es. catalogo" [(ngModel)]="moduleObj.module.menuActive" clearInput></ion-input>
   </ion-item>
 
   <br/>
@@ -29,16 +29,16 @@
 
   <ion-list *ngFor="let submodule of moduleObj.submodules; let i = index;" style="margin-left: 20px;">
     <ion-item>
-      <ion-label color="primary">Sottomenu {{i+1}}.</ion-label>
+      <ion-label color="primary">Nome sottomodulo {{i+1}}.</ion-label>
       <ion-input placeholder="Es. StatsSubmoduleOne" [(ngModel)]="submodule.name" clearInput></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label color="primary">Menu label</ion-label>
+      <ion-label color="primary">Menu label sottomodulo</ion-label>
       <ion-input placeholder="Es. Sottomodulo statistiche" [(ngModel)]="submodule.menuLabel" clearInput></ion-input>
     </ion-item>
     <ion-item>
-      <ion-label color="primary">Sottomenu di default</ion-label>
       <ion-toggle [(ngModel)]="submodule.isDefault" (ngModelChange)="onDefaultSelected(i, submodule.isDefault)"></ion-toggle>
+      <ion-label color="primary">È sottomenu di default</ion-label>
     </ion-item>
   </ion-list>
 
@@ -51,5 +51,32 @@
     <ion-icon name="checkmark"></ion-icon>&nbsp;
       Genera modulo
   </button>
+</div>
+
+<div *ngIf="created">
+
+  <div *ngIf="createdFileList && createdFileList.length" style="margin-top: 30px;">
+    <h1>Files e cartelle creati</h1>
+    <ion-list>
+      <ion-item *ngFor="let file of createdFileList; let i = index;">
+        <h2>{{file.name}}</h2>
+        <p>{{file.path}}</p>
+        <ion-icon *ngIf="file.type == 'folder'" name="folder" color="boy" item-end></ion-icon>
+        <ion-icon *ngIf="file.type == 'file'" name="document" color="girl" item-end></ion-icon>
+      </ion-item>
+    </ion-list>
+  </div>
+  
+  <ion-item *ngIf="navbarSnippet">
+      <ion-label stacked>Navbar menu snippet</ion-label>
+      <ion-textarea [(ngModel)]="navbarSnippet"></ion-textarea>
+  </ion-item>
+
+
+  <button ion-button color="red" (click)="deleteModule()">
+    <ion-icon name="trash"></ion-icon>&nbsp;
+      Elimina modulo
+  </button>
+</div>
 
 </ion-content>

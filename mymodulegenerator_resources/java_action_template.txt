@@ -14,7 +14,7 @@ public class ##module_name_camel##Action extends Command {
 
 	@Override
 	public String exec(Context context) {
-		return "##module_name_lower_case##/##module_name_folder##.vm";
+		return "##module_name_folder##/##module_name_folder##.vm";
 	}
 
 }
