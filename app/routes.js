@@ -624,6 +624,27 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
         return p;
     }
 
+    var getPathByKey = (key, pc) => {
+        for(let i=0; i<pc.length; i++) {
+            if(pc[i].key == key) return pc[i].value;
+        }
+    }
+
+    var initPathConfiguration = () => {
+        getPathConfiguration.then((pc) => {
+            console.log("Path configuration : ");
+            console.log(pc);
+            project_base_url = getPathByKey("project_base_url",pc);
+            project_webapp_url = getPathByKey("project_webapp_url",pc);
+            project_core_url = getPathByKey("project_core_url",pc);
+            velocity_base_url = getPathByKey("velocity_base_url",pc);
+            view_base_url = getPathByKey("view_base_url",pc);
+            css_base_url = getPathByKey("css_base_url",pc);
+            js_base_url = getPathByKey("js_base_url",pc);
+            java_base_url = getPathByKey("java_base_url",pc);
+        });
+    }
+
 
     var savePathConfiguration = (configJson) => {
         if(fs.existsSync(pathConfigurationCustomPath)) fs.unlinkSync(pathConfigurationCustomPath);
@@ -644,7 +665,14 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     });
 
 
-
+    app.post('/api/deleteSingle', function(req, res) { 
+        let path = req.body;
+        if(fs.existsSync(path)) {
+            if(fs.statSync(path).isDirectory()) deleteFolderRecursive(path);
+            else fs.unlinkSync(path);
+            res.json({"deleted" : "ok"});
+        } else res.json({"deleted" : "ko", "error" : "file or folder not found"});
+    });
 
     app.post('/api/deleteModule', function(req, res) {
         let pathList = req.body;
@@ -673,6 +701,7 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
         let menuActive = module.menuActive;
 
         Promise.all([
+        initPathConfiguration(),
         generateJsFolders(module.name),
         generateHtmlFolders(module.name),
         generateCssFolder(module.name),

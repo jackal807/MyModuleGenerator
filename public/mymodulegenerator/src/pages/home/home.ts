@@ -79,6 +79,18 @@ export class HomePage {
         );
   }
 
+  deleteSingle(path) {
+    let self = this;
+    this.ws.deleteSingle(path)
+        .subscribe(
+        data => { 
+          console.log(data);
+        },
+        err => console.log("error is " + err),
+        () => console.log('single deletion complete')
+        );
+  }
+
   openMenu() {
     this.menuCtrl.open();
   }

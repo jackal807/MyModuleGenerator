@@ -43,4 +43,9 @@ export class RestProvider {
     .map(res => res.json());
   }
 
+  deleteSingle(data: any) {
+    return this.http.post(this.apiBaseUrl + 'deleteSingle', data, this.options)
+    .map(res => res.json());
+  }
+
 }
