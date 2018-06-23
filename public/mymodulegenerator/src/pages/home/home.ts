@@ -91,6 +91,15 @@ export class HomePage {
         );
   }
 
+  copyToClipboard()  {
+    var textArea = document.createElement("textarea");
+	  textArea.value = this.navbarSnippet;
+    document.body.appendChild(textArea);
+	  textArea.select();
+    document.execCommand('copy');
+	  document.body.removeChild(textArea);
+  }
+
   openMenu() {
     this.menuCtrl.open();
   }

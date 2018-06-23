@@ -12,18 +12,31 @@
 <ion-content padding>
 
  <div *ngIf="!created">
-  <ion-item>
-    <ion-label color="primary">Nome modulo</ion-label>
-    <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.module.name" clearInput></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-label color="primary">Menu label</ion-label>
-    <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.module.menuLabel" clearInput></ion-input>
-  </ion-item>
-  <ion-item>
-    <ion-label color="primary">Menu padre navbar</ion-label>
-    <ion-input placeholder="Es. catalogo" [(ngModel)]="moduleObj.module.menuActive" clearInput></ion-input>
-  </ion-item>
+    <ion-grid  class="white">
+        <ion-row>
+          <ion-col>
+              <ion-item>
+                  <ion-label color="primary">Nome modulo</ion-label>
+                  <ion-input placeholder="es. StatsRevenue" [(ngModel)]="moduleObj.module.name" clearInput></ion-input>
+                </ion-item>
+          </ion-col>
+          <ion-col>
+              <ion-item>
+                  <ion-label color="primary">Menu label</ion-label>
+                  <ion-input placeholder="es. Statistiche revenue" [(ngModel)]="moduleObj.module.menuLabel" clearInput></ion-input>
+                </ion-item>
+          </ion-col>
+
+          <ion-col>
+              <ion-item>
+                  <ion-label color="primary">Menu padre navbar</ion-label>
+                  <ion-input id="navbarSnippet" placeholder="Es. catalogo" [(ngModel)]="moduleObj.module.menuActive" clearInput></ion-input>
+                </ion-item>
+          </ion-col>
+        </ion-row>
+ </ion-grid>
+ 
+ 
 
   <br/>
   <br/>
@@ -72,12 +85,17 @@
       <ion-label stacked>Navbar menu snippet</ion-label>
       <ion-textarea [(ngModel)]="navbarSnippet"></ion-textarea>
   </ion-item>
+  <button ion-button color="danger" (click)="copyToClipboard()">
+      <ion-icon name="copy"></ion-icon>&nbsp;
+      Copia
+  </button>
 
 
   <button ion-button color="red" (click)="deleteModule()">
     <ion-icon name="trash"></ion-icon>&nbsp;
       Elimina modulo
   </button>
+  
 </div>
 
 </ion-content>
