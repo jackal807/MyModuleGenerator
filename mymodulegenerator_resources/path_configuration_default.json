@@ -1,0 +1,10 @@
+[
+    {"key" : "project_base_url", "label" : "Progetto base url", "value": "C:/Users/DANIELE-PC/git/mysaas/MySaas" },
+    {"key" : "project_webapp_url", "label" : "Webapp", "value": "mysaas-webapp" },
+    {"key" : "project_core_url", "label" : "Core", "value": "mysaas-core" },
+    {"key" : "velocity_base_url", "label" : "Velocity", "value": "src/main/webapp/WEB-INF/template/v2" },
+    {"key" : "view_base_url", "label" : "View HTML", "value": "src/main/webapp/backoffice/v2/angular-resources" },
+    {"key" : "css_base_url", "label" : "Css", "value": "src/main/webapp/backoffice/v2/css" },
+    {"key" : "js_base_url", "label" : "JavaScript", "value": "src/main/webapp/backoffice/v2/js/angular" },
+    {"key" : "java_base_url", "label" : "Java", "value": "src/main/java/com/mycomp" }
+]
