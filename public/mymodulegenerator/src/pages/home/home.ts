@@ -29,6 +29,10 @@ export class HomePage {
      this.created = false;
   }
 
+  removeSubmodule(submodule, index) {
+    this.moduleObj.submodules.splice(index, 1);
+  }
+
 
   onDefaultSelected(i, val) {
       if(val==true)

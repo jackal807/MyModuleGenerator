@@ -115,85 +115,117 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
 
     var createDirList = (dirList) => {
-        for(let i=0; i<dirList.length; i++) 
-            if(!fs.existsSync(dirList[i])) {
-                fs.mkdirSync(dirList[i]);
-                addCreatedFile(dirList[i], pathToFileName(dirList[i]), "folder");
+        var p = new Promise(function(resolve, reject){
+            for(let i=0; i<dirList.length; i++) {
+                if(!fs.existsSync(dirList[i])) {
+                    fs.mkdirSync(dirList[i]);
+                    addCreatedFile(dirList[i], pathToFileName(dirList[i]), "folder");
+                }
+                if(i==(dirList.length-1)) resolve();
             }
+        });
+        return p;
     }
 
 
     var generateJsFolders = (moduleNameCamel) => {
-        let jsUrl = getJsUrl();
-        let moduleJsUrl = jsUrl + "/" + moduleNameToFolderName(moduleNameCamel);
-        let controllersDirPath = moduleJsUrl + "/controllers";
-        let servicesDirPath = moduleJsUrl + "/services";
-        let directivesDirPath = moduleJsUrl + "/directives";
-        let filtersDirPath = moduleJsUrl + "/filters";
-        let confDirPath = moduleJsUrl + "/conf";
-
-        createDirList([moduleJsUrl, controllersDirPath, servicesDirPath, directivesDirPath, filtersDirPath, confDirPath]);
+        var p = new Promise(function(resolve, reject){ 
+            let jsUrl = getJsUrl();
+            let moduleJsUrl = jsUrl + "/" + moduleNameToFolderName(moduleNameCamel);
+            let controllersDirPath = moduleJsUrl + "/controllers";
+            let servicesDirPath = moduleJsUrl + "/services";
+            let directivesDirPath = moduleJsUrl + "/directives";
+            let filtersDirPath = moduleJsUrl + "/filters";
+            let confDirPath = moduleJsUrl + "/conf";
+            createDirList([moduleJsUrl, controllersDirPath, servicesDirPath, directivesDirPath, filtersDirPath, confDirPath]).then(() => {
+                resolve();
+            })
+        });
+        return p;
     }
 
 
     var generateHtmlFolders = (moduleNameCamel) => {
-        let htmlUrl = getViewsUrl();
-        let moduleHtmlUrl = htmlUrl + "/" + moduleNameToFolderName(moduleNameCamel);
-        let directivesDirPath = moduleHtmlUrl + "/directives";
-        let modalsDirPath = moduleHtmlUrl + "/modals";
-        let viewsDirPath = moduleHtmlUrl + "/views";
-        let partialsDirPath = viewsDirPath + "/partials";
+        var p = new Promise(function(resolve, reject){ 
+            let htmlUrl = getViewsUrl();
+            let moduleHtmlUrl = htmlUrl + "/" + moduleNameToFolderName(moduleNameCamel);
+            let directivesDirPath = moduleHtmlUrl + "/directives";
+            let modalsDirPath = moduleHtmlUrl + "/modals";
+            let viewsDirPath = moduleHtmlUrl + "/views";
+            let partialsDirPath = viewsDirPath + "/partials";
 
-        createDirList([moduleHtmlUrl, directivesDirPath, modalsDirPath, viewsDirPath, partialsDirPath]);
+            createDirList([moduleHtmlUrl, directivesDirPath, modalsDirPath, viewsDirPath, partialsDirPath]).then(() => {
+                resolve();
+            });
+        });
+        return p;
     }
 
     var generateCssFolder = (moduleNameCamel) => {
-        let cssUrl = getCssUrl();
-        let moduleCssUrl = cssUrl + "/" + moduleNameToFolderName(moduleNameCamel);
-        createDirList([moduleCssUrl]);
+        var p = new Promise(function(resolve, reject){ 
+            let cssUrl = getCssUrl();
+            let moduleCssUrl = cssUrl + "/" + moduleNameToFolderName(moduleNameCamel);
+            createDirList([moduleCssUrl]).then(() => {
+                resolve();
+            });
+        });
+        return p;
     }
 
     var generateVelocityFolder = (moduleNameCamel) => {
-        let velocityUrl = getVelocityUrl();
-        let moduleVelocityUrl = velocityUrl + "/" + moduleNameToFolderName(moduleNameCamel);
-        createDirList([moduleVelocityUrl]);
+        var p = new Promise(function(resolve, reject){ 
+            let velocityUrl = getVelocityUrl();
+            let moduleVelocityUrl = velocityUrl + "/" + moduleNameToFolderName(moduleNameCamel);
+            createDirList([moduleVelocityUrl]).then(() => {
+                resolve();
+            });
+        });
+        return p;
     }
 
 
     var generateJavaFolder = (moduleNameCamel) => {
-        let javaUrl = getJavaActionUrl();
-        let moduleJavaUrl = javaUrl + "/" + moduleNameCamel.toLowerCase();
-        let moduleJavaActionUrl = moduleJavaUrl + "/action"
-        createDirList([moduleJavaUrl, moduleJavaActionUrl]);
+        var p = new Promise(function(resolve, reject){ 
+            let javaUrl = getJavaActionUrl();
+            let moduleJavaUrl = javaUrl + "/" + moduleNameCamel.toLowerCase();
+            let moduleJavaActionUrl = moduleJavaUrl + "/action"
+            createDirList([moduleJavaUrl, moduleJavaActionUrl]).then(() => {
+                resolve();
+            });
+        });
+        return p;
     }
 
 
 
     var generateViews = (module, arr_submodules) => {
         //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+        var p = new Promise(function(resolve, reject){ 
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
 
-        let moduleNameCamel = module.name;
+            let moduleNameCamel = module.name;
 
-        let submoduleNameRegex = new RegExp("##submodule_name##", 'g');
+            let submoduleNameRegex = new RegExp("##submodule_name##", 'g');
 
-        let viewsPath = getViewsUrl() + "/" + moduleNameToFolderName(module.name) + "/views";
-        if(!fs.existsSync(viewsPath)) fs.mkdirSync(viewsPath);
+            let viewsPath = getViewsUrl() + "/" + moduleNameToFolderName(module.name) + "/views";
+            if(!fs.existsSync(viewsPath)) fs.mkdirSync(viewsPath);
 
-        //lettura del template per le views
-        fs.readFile(viewsTemplatePath, 'utf8',function read(err, data) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + viewsTemplatePath);
-                Promise.reject(err);
-            } else {
-                for(let i=0; i<arr_submodules.length; i++) {
-                    let submoduleName = arr_submodules[i].name;
-                    let templateBodyTemp = data.replace(submoduleNameRegex, camelToDelimiter(submoduleName));
-                    let submoduleViewFilePath = viewsPath + "/" + camelToDelimiter(submoduleName) + ".html" ;
-                    textToFile(templateBodyTemp, submoduleViewFilePath, false);
+            //lettura del template per le views
+            fs.readFile(viewsTemplatePath, 'utf8',function read(err, data) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + viewsTemplatePath);
+                    Promise.reject(err);
+                } else {
+                    for(let i=0; i<arr_submodules.length; i++) {
+                        let submoduleName = arr_submodules[i].name;
+                        let templateBodyTemp = data.replace(submoduleNameRegex, camelToDelimiter(submoduleName));
+                        let submoduleViewFilePath = viewsPath + "/" + camelToDelimiter(submoduleName) + ".html" ;
+                        textToFile(templateBodyTemp, submoduleViewFilePath, false).then(() => { resolve() });
+                    }
                 }
-            }
+            });
         });
+        return p;
     }
 
 
@@ -305,74 +337,82 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
 
     var generateStyles = (module, arr_submodules) => {
-        //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
-        let moduleNameCamel = module.name;
-        let cssPath = getCssUrl() + "/" + moduleNameToFolderName(moduleNameCamel);
-        if(!fs.existsSync(cssPath)) fs.mkdirSync(cssPath);
-        let cssFilePath = cssPath + "/" + camelToDelimiter(moduleNameCamel) + "-commons.css" ;
-        textToFile("", cssFilePath, false);
+        var p = new Promise(function(resolve, reject){ 
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+            let moduleNameCamel = module.name;
+            let cssPath = getCssUrl() + "/" + moduleNameToFolderName(moduleNameCamel);
+            if(!fs.existsSync(cssPath)) fs.mkdirSync(cssPath);
+            let cssFilePath = cssPath + "/" + camelToDelimiter(moduleNameCamel) + "-commons.css" ;
+            textToFile("", cssFilePath, false).then(() => { resolve() });
+        });
+        return p;
     }
 
 
     var generateJavaAction = (module) => {
-        let moduleNameCamel = module.name;
-        let moduleNameFolder = moduleNameToFolderName(module.name);
-        let moduleNameLower = module.name.toLowerCase();
+        var p = new Promise(function(resolve, reject){ 
+            let moduleNameCamel = module.name;
+            let moduleNameFolder = moduleNameToFolderName(module.name);
+            let moduleNameLower = module.name.toLowerCase();
 
 
-        let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
-        let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
-        let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
+            let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
+            let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
+            let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
 
-        let javaActionPath = getJavaActionUrl() + "/" + moduleNameLower + "/action";
-        if(!fs.existsSync(javaActionPath)) fs.mkdirSync(javaActionPath);
-        let javaActionFilePath = javaActionPath + "/" + moduleNameCamel + "Action.java" ;
+            let javaActionPath = getJavaActionUrl() + "/" + moduleNameLower + "/action";
+            if(!fs.existsSync(javaActionPath)) fs.mkdirSync(javaActionPath);
+            let javaActionFilePath = javaActionPath + "/" + moduleNameCamel + "Action.java" ;
 
-        fs.readFile(javaActionTemplatePath, 'utf8',function read(err, javaActionTemplateFileContent) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + configTemplatePath);
-                Promise.reject(err);
-            } else { 
-                let javaActionBodyTemp = javaActionTemplateFileContent
-                .replace(moduleNameCamelRegex, moduleNameCamel)
-                .replace(moduleNameLowerCaseRegex, moduleNameLower)
-                .replace(moduleNameFolderRegex, moduleNameFolder);
+            fs.readFile(javaActionTemplatePath, 'utf8',function read(err, javaActionTemplateFileContent) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + configTemplatePath);
+                    Promise.reject(err);
+                } else { 
+                    let javaActionBodyTemp = javaActionTemplateFileContent
+                    .replace(moduleNameCamelRegex, moduleNameCamel)
+                    .replace(moduleNameLowerCaseRegex, moduleNameLower)
+                    .replace(moduleNameFolderRegex, moduleNameFolder);
 
-                textToFile(javaActionBodyTemp, javaActionFilePath, false);
-            }
+                    textToFile(javaActionBodyTemp, javaActionFilePath, false).then(() => { resolve() });
+                }
+            });
         });
+        return p;
     }
 
 
     var generateServletController = (module) => {
+        var p = new Promise(function(resolve, reject){ 
+            let moduleNameCamel = module.name;
+            let moduleNameLowerCase = module.name.toLowerCase();
+            let serialUid = new Date();
+    
+            let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
+            let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
+            let moduleNameLowerCaseSlashRegex = new RegExp("##module_name_lower_case_slash##", 'g');
+            let serialUidRegex = new RegExp("##serial_uid##", 'g');
 
-        let moduleNameCamel = module.name;
-        let moduleNameLowerCase = module.name.toLowerCase();
-        let serialUid = new Date();
-   
-        let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
-        let moduleNameLowerCaseRegex = new RegExp("##module_name_lower_case##", 'g');
-        let moduleNameLowerCaseSlashRegex = new RegExp("##module_name_lower_case_slash##", 'g');
-        let serialUidRegex = new RegExp("##serial_uid##", 'g');
+            let javaServletControllerPath = getJavaActionUrl() + "/" + moduleNameLowerCase;
+            if(!fs.existsSync(javaServletControllerPath)) fs.mkdirSync(javaServletControllerPath);
+            let javaServletControllerFilePath = javaServletControllerPath + "/Controller" + moduleNameCamel + "Servlet.java" ;
 
-        let javaServletControllerPath = getJavaActionUrl() + "/" + moduleNameLowerCase;
-        if(!fs.existsSync(javaServletControllerPath)) fs.mkdirSync(javaServletControllerPath);
-        let javaServletControllerFilePath = javaServletControllerPath + "/Controller" + moduleNameCamel + "Servlet.java" ;
-
-        fs.readFile(javaServletControllerTemplatePath, 'utf8',function read(err, javaServletControllerTemplateFileContent) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + javaServletControllerTemplatePath);
-                Promise.reject(err);
-            } else { 
-                let javaServletControllerBodyTemp = javaServletControllerTemplateFileContent
-                .replace(moduleNameCamelRegex, moduleNameCamel)
-                .replace(moduleNameLowerCaseRegex, moduleNameLowerCase)
-                .replace(moduleNameLowerCaseSlashRegex, "/" + moduleNameLowerCase)
-                .replace(serialUidRegex, serialUid.getTime());
-                textToFile(javaServletControllerBodyTemp, javaServletControllerFilePath, false);
-            }
+            fs.readFile(javaServletControllerTemplatePath, 'utf8',function read(err, javaServletControllerTemplateFileContent) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + javaServletControllerTemplatePath);
+                    Promise.reject(err);
+                } else { 
+                    let javaServletControllerBodyTemp = javaServletControllerTemplateFileContent
+                    .replace(moduleNameCamelRegex, moduleNameCamel)
+                    .replace(moduleNameLowerCaseRegex, moduleNameLowerCase)
+                    .replace(moduleNameLowerCaseSlashRegex, "/" + moduleNameLowerCase)
+                    .replace(serialUidRegex, serialUid.getTime());
+                    textToFile(javaServletControllerBodyTemp, javaServletControllerFilePath, false).then(() => { resolve() });
+                }
+            });
         });
+        return p;
 
     }
 
@@ -381,64 +421,67 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
 
     var generateConfig = (module, arr_submodules) => {
-        //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+        var p = new Promise(function(resolve, reject){ 
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
 
-        let moduleNameLowerCase = module.name.toLowerCase();
-        let moduleNameFolder = moduleNameToFolderName(module.name);
+            let moduleNameLowerCase = module.name.toLowerCase();
+            let moduleNameFolder = moduleNameToFolderName(module.name);
 
-        let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
+            let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
 
-        let moduleNameLowerRegex = new RegExp("##module_name_lower_case##", 'g');
-        let submoduleNameLowerRegex = new RegExp("##submodule_name_lower_case##", 'g');
+            let moduleNameLowerRegex = new RegExp("##module_name_lower_case##", 'g');
+            let submoduleNameLowerRegex = new RegExp("##submodule_name_lower_case##", 'g');
 
-        let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
-        let submoduleNameFolderRegex = new RegExp("##submodule_name_folder##", 'g');
+            let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
+            let submoduleNameFolderRegex = new RegExp("##submodule_name_folder##", 'g');
 
-        let statesListRegex = new RegExp("##states_list##", 'g');
+            let statesListRegex = new RegExp("##states_list##", 'g');
 
-        let configPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/conf";
-        if(!fs.existsSync(configPath)) fs.mkdirSync(configPath);
+            let configPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/conf";
+            if(!fs.existsSync(configPath)) fs.mkdirSync(configPath);
 
-        //lettura del template per i controllers
-        fs.readFile(configTemplatePath, 'utf8',function read(err, configTemplateFileContent) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + configTemplatePath);
-                Promise.reject(err);
-            } else {
-                fs.readFile(configStateTemplatePath, 'utf8',function read(err, configStateTemplateFileContent) { 
-                    if (err)  {
-                        log("Errore durante la lettura del file : " + configStateTemplatePath);
-                        Promise.reject(err);
-                    } else { 
-                        let statesList = "";
-                        for(let i=0; i<arr_submodules.length; i++) {
+            //lettura del template per i controllers
+            fs.readFile(configTemplatePath, 'utf8',function read(err, configTemplateFileContent) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + configTemplatePath);
+                    Promise.reject(err);
+                } else {
+                    fs.readFile(configStateTemplatePath, 'utf8',function read(err, configStateTemplateFileContent) { 
+                        if (err)  {
+                            log("Errore durante la lettura del file : " + configStateTemplatePath);
+                            Promise.reject(err);
+                        } else { 
+                            let statesList = "";
+                            for(let i=0; i<arr_submodules.length; i++) {
 
-                            let submoduleNameCamel = arr_submodules[i].name;
-                            let submoduleNameLowerCase = arr_submodules[i].name.toLowerCase();
-                            let submoduleNameFolder = moduleNameToFolderName(arr_submodules[i].name);
+                                let submoduleNameCamel = arr_submodules[i].name;
+                                let submoduleNameLowerCase = arr_submodules[i].name.toLowerCase();
+                                let submoduleNameFolder = moduleNameToFolderName(arr_submodules[i].name);
 
-                            //replace nel template singolo stato
-                            let configStateTemplateBodyTemp = configStateTemplateFileContent
-                            .replace(submoduleNameLowerRegex, submoduleNameLowerCase)
-                            .replace(moduleNameLowerRegex, ("/" + moduleNameLowerCase))
-                            .replace(moduleNameFolderRegex, moduleNameFolder)
-                            .replace(submoduleNameFolderRegex, submoduleNameFolder)
-                            .replace(submoduleNameCamelRegex, submoduleNameCamel);
+                                //replace nel template singolo stato
+                                let configStateTemplateBodyTemp = configStateTemplateFileContent
+                                .replace(submoduleNameLowerRegex, submoduleNameLowerCase)
+                                .replace(moduleNameLowerRegex, ("/" + moduleNameLowerCase))
+                                .replace(moduleNameFolderRegex, moduleNameFolder)
+                                .replace(submoduleNameFolderRegex, submoduleNameFolder)
+                                .replace(submoduleNameCamelRegex, submoduleNameCamel);
 
-                            statesList += configStateTemplateBodyTemp;
+                                statesList += configStateTemplateBodyTemp;
+                            }
+
+                            //replace nel template config complessivo
+                            let configStateTemplateBodyTemp = configTemplateFileContent
+                            .replace(moduleNameLowerRegex, moduleNameLowerCase)
+                            .replace(statesListRegex, statesList);
+                            let configFilePath = configPath + "/config.js" ;
+                            textToFile(configStateTemplateBodyTemp, configFilePath, false).then(() => { resolve() });
                         }
-
-                        //replace nel template config complessivo
-                        let configStateTemplateBodyTemp = configTemplateFileContent
-                        .replace(moduleNameLowerRegex, moduleNameLowerCase)
-                        .replace(statesListRegex, statesList);
-                        let configFilePath = configPath + "/config.js" ;
-                        textToFile(configStateTemplateBodyTemp, configFilePath, false);
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
+        return p;
     }
 
 
@@ -446,161 +489,176 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
 
 
     var generateControllers = (module, arr_submodules) => {
-        //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+        var p = new Promise(function(resolve, reject){ 
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
 
-        let moduleNameCamel = module.name;
+            let moduleNameCamel = module.name;
 
-        let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
-        let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
+            let moduleNameCamelRegex = new RegExp("##module_name_camel##", 'g');
+            let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
 
-        let controllersPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/controllers";
-        if(!fs.existsSync(controllersPath)) fs.mkdirSync(controllersPath);
+            let controllersPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/controllers";
+            if(!fs.existsSync(controllersPath)) fs.mkdirSync(controllersPath);
 
-        //lettura del template per i controllers
-        fs.readFile(controllersTemplatePath, 'utf8',function read(err, data) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + controllersTemplatePath);
-                Promise.reject(err);
-            } else {
-                for(let i=0; i<arr_submodules.length; i++) {
-                    let submoduleName = arr_submodules[i].name;
-                    let templateBodyTemp = data.replace(submoduleNameCamelRegex, submoduleName).replace(moduleNameCamelRegex, moduleNameCamel);
-                    let submoduleControllerFilePath = controllersPath + "/" + submoduleName + "Ctrl" + ".js";
-                    textToFile(templateBodyTemp, submoduleControllerFilePath, false);
+            //lettura del template per i controllers
+            fs.readFile(controllersTemplatePath, 'utf8',function read(err, data) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + controllersTemplatePath);
+                    Promise.reject(err);
+                } else {
+                    for(let i=0; i<arr_submodules.length; i++) {
+                        let submoduleName = arr_submodules[i].name;
+                        let templateBodyTemp = data.replace(submoduleNameCamelRegex, submoduleName).replace(moduleNameCamelRegex, moduleNameCamel);
+                        let submoduleControllerFilePath = controllersPath + "/" + submoduleName + "Ctrl" + ".js";
+                        textToFile(templateBodyTemp, submoduleControllerFilePath, false).then(() => { resolve() });
+                    }
                 }
-            }
+            });
         });
+        return p;
     }
 
 
     var generateServices = (module, arr_submodules) => {
-        //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+        var p = new Promise(function(resolve, reject){ 
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
 
-        let moduleNameCamel = module.name;
+            let moduleNameCamel = module.name;
 
-        let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
+            let submoduleNameCamelRegex = new RegExp("##submodule_name_camel##", 'g');
 
-        let servicesPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/services";
-        if(!fs.existsSync(servicesPath)) fs.mkdirSync(servicesPath);
+            let servicesPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/services";
+            if(!fs.existsSync(servicesPath)) fs.mkdirSync(servicesPath);
 
-        //lettura del template per i services
-        fs.readFile(servicesTemplatePath, 'utf8',function read(err, data) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + servicesTemplatePath);
-                Promise.reject(err);
-            } else {
-                //nel caso dei services creiamo anche un commonmodulenamesrvc che sarà iniettato in tutti i controllers
-                let templateBodyTemp = data.replace(submoduleNameCamelRegex, "Common" + moduleNameCamel);
-                let submoduleServiceFilePath = servicesPath + "/" + "Common" + moduleNameCamel + "Srvc" + ".js"; 
-                textToFile(templateBodyTemp, submoduleServiceFilePath, false);
-
-                for(let i=0; i<arr_submodules.length; i++) {
-                    let submoduleName = arr_submodules[i].name;
-                    templateBodyTemp = data.replace(submoduleNameCamelRegex, submoduleName);
-                    submoduleServiceFilePath = servicesPath + "/" + submoduleName + "Srvc" + ".js" 
+            //lettura del template per i services
+            fs.readFile(servicesTemplatePath, 'utf8',function read(err, data) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + servicesTemplatePath);
+                    Promise.reject(err);
+                } else {
+                    //nel caso dei services creiamo anche un commonmodulenamesrvc che sarà iniettato in tutti i controllers
+                    let templateBodyTemp = data.replace(submoduleNameCamelRegex, "Common" + moduleNameCamel);
+                    let submoduleServiceFilePath = servicesPath + "/" + "Common" + moduleNameCamel + "Srvc" + ".js"; 
                     textToFile(templateBodyTemp, submoduleServiceFilePath, false);
+
+                    for(let i=0; i<arr_submodules.length; i++) {
+                        let submoduleName = arr_submodules[i].name;
+                        templateBodyTemp = data.replace(submoduleNameCamelRegex, submoduleName);
+                        submoduleServiceFilePath = servicesPath + "/" + submoduleName + "Srvc" + ".js" 
+                        textToFile(templateBodyTemp, submoduleServiceFilePath, false).then(() => { resolve() });
+                    }
                 }
-            }
+            });
         });
+        return p;
     }
 
 
     var generateDirectives = (module) => {
-        let directivesPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/directives";
-        if(!fs.existsSync(directivesPath)) fs.mkdirSync(directivesPath);
-        let directiveFilePath = directivesPath + "/directives.js" 
-        textToFile("", directiveFilePath, false);
+        var p = new Promise(function(resolve, reject){ 
+            let directivesPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/directives";
+            if(!fs.existsSync(directivesPath)) fs.mkdirSync(directivesPath);
+            let directiveFilePath = directivesPath + "/directives.js" 
+            textToFile("", directiveFilePath, false).then(() => { resolve() });
+        });
+        return p;
     }
 
     var generateFilters = (module) => {
-        let filtersPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/filters";
-        if(!fs.existsSync(filtersPath)) fs.mkdirSync(filtersPath);
-        let filterFilePath = filtersPath + "/filters.js" 
-        textToFile("", filterFilePath, false);
+        var p = new Promise(function(resolve, reject){ 
+            let filtersPath = getJsUrl() + "/" + moduleNameToFolderName(module.name) + "/filters";
+            if(!fs.existsSync(filtersPath)) fs.mkdirSync(filtersPath);
+            let filterFilePath = filtersPath + "/filters.js" 
+            textToFile("", filterFilePath, false).then(() => { resolve() });
+        });
+        return p;
     }
 
 
 
 
     var generateVelocity = (module, arr_submodules, template_title, menu_active) => {
-        //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
-        if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
+        var p = new Promise(function(resolve, reject){ 
+            //se non ci sono sottomoduli il modulo principale viene considerato come uno di essi
+            if(!arr_submodules || !arr_submodules.length) arr_submodules = [module];
 
-        let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
-        let moduleNameFolderSlashRegex = new RegExp("##module_name_folder_slash##", 'g');
-        let templateTitleRegex = new RegExp("##template_title##", 'g');
-        let menuActiveRegex = new RegExp("##menu_active##", 'g');
-        let servicesImportsRegex = new RegExp("##services_imports##", 'g');
-        let controllersImportsRegex = new RegExp("##controllers_imports##", 'g');
+            let moduleNameFolderRegex = new RegExp("##module_name_folder##", 'g');
+            let moduleNameFolderSlashRegex = new RegExp("##module_name_folder_slash##", 'g');
+            let templateTitleRegex = new RegExp("##template_title##", 'g');
+            let menuActiveRegex = new RegExp("##menu_active##", 'g');
+            let servicesImportsRegex = new RegExp("##services_imports##", 'g');
+            let controllersImportsRegex = new RegExp("##controllers_imports##", 'g');
 
-        let serviceOrControllerRegex = new RegExp("##service_or_controller##", 'g');
-        let submoduleFileNameCamelRegex = new RegExp("##submodule_file_name_camel##", 'g');
+            let serviceOrControllerRegex = new RegExp("##service_or_controller##", 'g');
+            let submoduleFileNameCamelRegex = new RegExp("##submodule_file_name_camel##", 'g');
 
-        let moduleNameFolder = moduleNameToFolderName(module.name);
+            let moduleNameFolder = moduleNameToFolderName(module.name);
 
-        let velocityPath = getVelocityUrl() + "/" + moduleNameToFolderName(module.name);
-        if(!fs.existsSync(velocityPath)) fs.mkdirSync(velocityPath);
+            let velocityPath = getVelocityUrl() + "/" + moduleNameToFolderName(module.name);
+            if(!fs.existsSync(velocityPath)) fs.mkdirSync(velocityPath);
 
-        //lettura del template per i controllers
-        fs.readFile(velocityTemplatePath, 'utf8',function read(err, velocityTemplateFileContent) {
-            if (err)  {
-                log("Errore durante la lettura del file : " + velocityTemplatePath);
-                Promise.reject(err);
-            } else {
+            //lettura del template per i controllers
+            fs.readFile(velocityTemplatePath, 'utf8',function read(err, velocityTemplateFileContent) {
+                if (err)  {
+                    log("Errore durante la lettura del file : " + velocityTemplatePath);
+                    Promise.reject(err);
+                } else {
 
 
-                fs.readFile(velocityJsImportTemplatePath, 'utf8',function read(err, velocityJsImportTemplateFileContent) {
-                    if (err)  {
-                        log("Errore durante la lettura del file : " + velocityJsImportTemplatePath);
-                        Promise.reject(err);
-                    } else { 
-                        let servicesImportList = "";
-                        let controllersImportList = "";
+                    fs.readFile(velocityJsImportTemplatePath, 'utf8',function read(err, velocityJsImportTemplateFileContent) {
+                        if (err)  {
+                            log("Errore durante la lettura del file : " + velocityJsImportTemplatePath);
+                            Promise.reject(err);
+                        } else { 
+                            let servicesImportList = "";
+                            let controllersImportList = "";
 
-                        //TODO AGGIUNGERE COMMONSSRVC
-                        let templateSrvcBodyTemp = velocityJsImportTemplateFileContent
-                            .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
-                            .replace(serviceOrControllerRegex, "/services")
-                            .replace(submoduleFileNameCamelRegex,"/" +  "Common" + module.name + "Srvc.js");
-
-                        servicesImportList += templateSrvcBodyTemp;
-
-                        for(let i=0; i<arr_submodules.length; i++) {
-                            let submoduleName = arr_submodules[i].name;
-
-                            //replace del singolo import javascript per i servizi
-                            templateSrvcBodyTemp = velocityJsImportTemplateFileContent
-                            .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
-                            .replace(serviceOrControllerRegex, "/services")
-                            .replace(submoduleFileNameCamelRegex,"/" +  submoduleName + "Srvc.js");
-
-                            //replace del singolo import javascript per i controller
-                            let templateCtrlBodyTemp = velocityJsImportTemplateFileContent
-                            .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
-                            .replace(serviceOrControllerRegex, "/controllers")
-                            .replace(submoduleFileNameCamelRegex,"/" +  submoduleName + "Ctrl.js");
+                            //TODO AGGIUNGERE COMMONSSRVC
+                            let templateSrvcBodyTemp = velocityJsImportTemplateFileContent
+                                .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
+                                .replace(serviceOrControllerRegex, "/services")
+                                .replace(submoduleFileNameCamelRegex,"/" +  "Common" + module.name + "Srvc.js");
 
                             servicesImportList += templateSrvcBodyTemp;
-                            controllersImportList += templateCtrlBodyTemp;
+
+                            for(let i=0; i<arr_submodules.length; i++) {
+                                let submoduleName = arr_submodules[i].name;
+
+                                //replace del singolo import javascript per i servizi
+                                templateSrvcBodyTemp = velocityJsImportTemplateFileContent
+                                .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
+                                .replace(serviceOrControllerRegex, "/services")
+                                .replace(submoduleFileNameCamelRegex,"/" +  submoduleName + "Srvc.js");
+
+                                //replace del singolo import javascript per i controller
+                                let templateCtrlBodyTemp = velocityJsImportTemplateFileContent
+                                .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
+                                .replace(serviceOrControllerRegex, "/controllers")
+                                .replace(submoduleFileNameCamelRegex,"/" +  submoduleName + "Ctrl.js");
+
+                                servicesImportList += templateSrvcBodyTemp;
+                                controllersImportList += templateCtrlBodyTemp;
+                            }
+
+                            let templateVelocityBodyTemp = velocityTemplateFileContent
+                            .replace(servicesImportsRegex, servicesImportList)
+                            .replace(controllersImportsRegex, controllersImportList)
+                            .replace(moduleNameFolderRegex, moduleNameFolder)
+                            .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
+                            .replace(templateTitleRegex, template_title)
+                            .replace(menuActiveRegex, menu_active);
+
+                            let velocityFilePath = velocityPath + "/" + moduleNameToFolderName(module.name) + ".vm";
+                            textToFile(templateVelocityBodyTemp, velocityFilePath, false).then(() => { resolve() });
+
                         }
-
-                        let templateVelocityBodyTemp = velocityTemplateFileContent
-                        .replace(servicesImportsRegex, servicesImportList)
-                        .replace(controllersImportsRegex, controllersImportList)
-                        .replace(moduleNameFolderRegex, moduleNameFolder)
-                        .replace(moduleNameFolderSlashRegex, "/" + moduleNameFolder)
-                        .replace(templateTitleRegex, template_title)
-                        .replace(menuActiveRegex, menu_active);
-
-                        let velocityFilePath = velocityPath + "/" + moduleNameToFolderName(module.name) + ".vm";
-                        textToFile(templateVelocityBodyTemp, velocityFilePath, false);
-
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
+        return p;
     }
 
 
@@ -631,18 +689,20 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
     }
 
     var initPathConfiguration = () => {
-        getPathConfiguration.then((pc) => {
-            console.log("Path configuration : ");
-            console.log(pc);
-            project_base_url = getPathByKey("project_base_url",pc);
-            project_webapp_url = getPathByKey("project_webapp_url",pc);
-            project_core_url = getPathByKey("project_core_url",pc);
-            velocity_base_url = getPathByKey("velocity_base_url",pc);
-            view_base_url = getPathByKey("view_base_url",pc);
-            css_base_url = getPathByKey("css_base_url",pc);
-            js_base_url = getPathByKey("js_base_url",pc);
-            java_base_url = getPathByKey("java_base_url",pc);
+        let p = new Promise(function(resolve, reject){
+            getPathConfiguration().then((pc) => {
+                project_base_url = getPathByKey("project_base_url",pc);
+                project_webapp_url = getPathByKey("project_webapp_url",pc);
+                project_core_url = getPathByKey("project_core_url",pc);
+                velocity_base_url = getPathByKey("velocity_base_url",pc);
+                view_base_url = getPathByKey("view_base_url",pc);
+                css_base_url = getPathByKey("css_base_url",pc);
+                js_base_url = getPathByKey("js_base_url",pc);
+                java_base_url = getPathByKey("java_base_url",pc);
+                resolve();
+            });
         });
+        return p;
     }
 
 
@@ -700,36 +760,43 @@ module.exports = function(app, io, jwt, cheerio, fs, request) {
         let menuLabel = module.menuLabel;
         let menuActive = module.menuActive;
 
-        Promise.all([
-        initPathConfiguration(),
-        generateJsFolders(module.name),
-        generateHtmlFolders(module.name),
-        generateCssFolder(module.name),
-        generateJavaFolder(module.name),
-
-        generateVelocityFolder(module.name),
-
-        generateViews(module, submodules),
-
-        generateStyles(module, submodules),
-
-        generateControllers(module, submodules),
-        generateServices(module, submodules),
-        generateConfig(module, submodules),
-        generateDirectives(module),
-        generateFilters(module),
-
-        generateVelocity(module, submodules, menuLabel, menuActive),
-
-        generateServletController(module),
-        generateJavaAction(module)])
-        .then(function(allData) {
-
-            generateNavbarSnippet(module,submodules).then((navbarSnippet) => {
-                res.json({"createdFiles" : createdFiles, "navbarSnippet" : navbarSnippet});
+        initPathConfiguration().then(() => {
+            generateJsFolders(module.name).then(() => {
+                generateHtmlFolders(module.name).then(() => {
+                    generateCssFolder(module.name).then(() => {
+                        generateJavaFolder(module.name).then(() => {
+                            generateVelocityFolder(module.name).then(() => {
+                                generateViews(module, submodules).then(() => {
+                                    generateStyles(module, submodules).then(() => {
+                                        generateControllers(module, submodules).then(() => {
+                                            generateServices(module, submodules).then(() => {
+                                                generateConfig(module, submodules).then(() => {
+                                                    generateDirectives(module).then(() => {
+                                                        generateFilters(module).then(() => {
+                                                            generateVelocity(module, submodules, menuLabel, menuActive).then(() => {
+                                                                generateServletController(module).then(() => {
+                                                                    generateJavaAction(module).then(() => {                
+                                                                                generateNavbarSnippet(module,submodules).then((navbarSnippet) => {
+                                                                                    res.json({"createdFiles" : createdFiles, "navbarSnippet" : navbarSnippet});
+                                                                                });
+                                                                    });
+                                                                });
+                                                            });
+                                                        });
+                                                    });
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                                
+                  
+                    });
+                });
             });
         });
-
     });
 
         /* UTILITIES */

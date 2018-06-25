@@ -54,6 +54,12 @@
       <ion-toggle [(ngModel)]="submodule.isDefault" (ngModelChange)="onDefaultSelected(i, submodule.isDefault)"></ion-toggle>
       <ion-label color="primary">È sottomenu di default</ion-label>
     </ion-item>
+    <ion-item>
+      <button ion-button color="red" item-end (click)="removeSubmodule(submodule, i)">
+        <ion-icon name="trash"></ion-icon>&nbsp;
+          Rimuovi sottomodulo
+      </button>
+    </ion-item>
   </ion-list>
 
   <button ion-button color="boy" (click)="addSubmodule()">
